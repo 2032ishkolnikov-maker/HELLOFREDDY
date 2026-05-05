@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Credits</title>
+
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: black;
+      height: 100%;
+      overflow: hidden;
+      font-family: monospace;
+      color: white;
+    }
+
+    #credits {
+      position: absolute;
+      width: 100%;
+      bottom: -100%;
+      text-align: center;
+      animation: scrollUp 25s linear forwards;
+    }
+
+    @keyframes scrollUp {
+      from { bottom: -100%; }
+      to { bottom: 100%; }
+    }
+
+    h1 {
+      font-size: 40px;
+      margin-bottom: 40px;
+      color: #00ffcc;
+      text-shadow: 0 0 10px #00ffcc;
+    }
+
+    p {
+      margin: 20px 0;
+      font-size: 20px;
+      opacity: 0.8;
+    }
+
+    body {
+      animation: flicker 4s infinite;
+    }
+
+    @keyframes flicker {
+      0%,100% { opacity: 1; }
+      95% { opacity: 0.85; }
+      97% { opacity: 0.6; }
+      99% { opacity: 1; }
+    }
+
+    /* FINAL MESSAGE */
+    #finalMessage {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: #00ffcc;
+      font-size: 50px;
+      text-shadow: 0 0 20px #00ffcc;
+      opacity: 0;
+      z-index: 20;
+      letter-spacing: 4px;
+    }
+
+    .showMessage {
+      animation: glitchFade 2.5s forwards;
+    }
+
+    @keyframes glitchFade {
+      0% {
+        opacity: 0;
+        transform: translate(-50%, -70%) scale(0.9);
+      }
+
+      10% {
+        opacity: 1;
+        transform: translate(-52%, -48%);
+      }
+
+      20% { transform: translate(-48%, -52%); }
+
+      30% {
+        text-shadow: 2px 0 red, -2px 0 cyan, 0 0 15px #00ffcc;
+      }
+
+      50% {
+        text-shadow: -2px 0 red, 2px 0 cyan, 0 0 20px #00ffcc;
+      }
+
+      70% {
+        text-shadow: 1px 0 red, -1px 0 cyan, 0 0 25px #00ffcc;
+      }
+
+      100% {
+        opacity: 1;
+        transform: translate(-50%, -50%);
+        text-shadow: 0 0 20px #00ffcc;
+      }
+    }
+
+    /* BUTTONS */
+    #buttons {
+      position: fixed;
+      bottom: 30px;
+      width: 100%;
+      display: none;
+      justify-content: center;
+      gap: 20px;
+      z-index: 10;
+    }
+
+    #buttons button {
+      padding: 12px 25px;
+      background: black;
+      color: #00ffcc;
+      border: 1px solid #00ffcc;
+      font-family: monospace;
+      font-size: 16px;
+      cursor: pointer;
+      text-shadow: 0 0 5px #00ffcc;
+      box-shadow: 0 0 10px #00ffcc inset;
+      transition: 0.2s;
+    }
+
+    #buttons button:hover {
+      background: #00ffcc;
+      color: black;
+      box-shadow: 0 0 20px #00ffcc;
+    }
+  </style>
+</head>
+
+<body>
+
+<div id="credits">
+  <h1>6:00 AM</h1>
+
+  <p>You survived…</p>
+  <p>But they are still here.</p>
+
+  <p>────────────</p>
+
+  <p>Game Design</p>
+  <p>You</p>
+
+  <p>Programming</p>
+  <p>You</p>
+
+  <p>Animatronics</p>
+  <p>Watching You</p>
+
+  <p>────────────</p>
+
+  <p>Thank you for playing.</p>
+</div>
+
+<div id="finalMessage"></div>
+
+<div id="buttons">
+  <button onclick="restart()">Restart</button>
+  <button onclick="continueGame()">Continue</button>
+</div>
+
+<audio id="creepy" src="creepy.mp3" loop></audio>
+
+<script>
+  window.onload = () => {
+    const audio = document.getElementById("creepy");
+    audio.volume = 0.4;
+    audio.play().catch(() => {});
+
+    setTimeout(showFinalMessage, 25000);
+  };
+
+  function showFinalMessage() {
+    const msg = document.getElementById("finalMessage");
+    const finalText = "IT'S TIME";
+
+    const glitchChars = "!@#$%^&*()_+=-[]{};:<>?/\\|ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+
+    let iterations = 0;
+
+    msg.classList.add("showMessage");
+
+    const interval = setInterval(() => {
+      msg.textContent = finalText
+        .split("")
+        .map((char, index) => {
+
+          if (index < iterations) {
+            // missing letter flicker
+            if (Math.random() < 0.2) return "";
+            return finalText[index];
+          }
+
+          return glitchChars[Math.floor(Math.random() * glitchChars.length)];
+        })
+        .join("");
+
+      if (iterations >= finalText.length) {
+        clearInterval(interval);
+
+        setTimeout(() => {
+          msg.textContent = finalText;
+        }, 200);
+      }
+
+      iterations += 0.5;
+    }, 50);
+
+    setTimeout(() => {
+      document.getElementById("buttons").style.display = "flex";
+    }, 3500);
+  }
+
+  function restart() {
+    window.location.href = "index.html";
+  }
+
+  function continueGame() {
+    window.location.href = "game.html";
+  }
+</script>
+
+</body>
+</html>

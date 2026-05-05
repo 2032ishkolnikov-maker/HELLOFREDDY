@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>YOU DIED</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Creepster&family=Share+Tech+Mono&display=swap');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #000;
+      color: #fff;
+      font-family: 'Share Tech Mono', monospace;
+      overflow: hidden;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+    }
+
+    /* Animated static noise background */
+    #noise {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      opacity: 0.08;
+      pointer-events: none;
+    }
+
+    .content {
+      position: relative;
+      z-index: 10; /* Ensure content is above everything */
+      text-align: center;
+      max-width: 600px;
+      padding: 2rem;
+    }
+
+    .glitch {
+      font-family: 'Creepster', cursive;
+      font-size: clamp(3rem, 10vw, 7rem);
+      color: #ff0000;
+      text-shadow:
+        0 0 20px #ff0000,
+        0 0 60px #ff0000;
+      letter-spacing: 8px;
+      animation: glitch 2s infinite;
+      position: relative;
+    }
+
+    .glitch::before,
+    .glitch::after {
+      content: attr(data-text);
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%;
+    }
+    .glitch::before {
+      color: #0ff;
+      animation: glitchTop 2s infinite;
+      clip-path: polygon(0 0, 100% 0, 100% 35%, 0 35%);
+    }
+    .glitch::after {
+      color: #f0f;
+      animation: glitchBot 2s infinite;
+      clip-path: polygon(0 65%, 100% 65%, 100% 100%, 0 100%);
+    }
+
+    .subtitle {
+      margin-top: 1.5rem;
+      font-size: clamp(0.8rem, 2.5vw, 1.1rem);
+      color: #888;
+      line-height: 1.8;
+    }
+
+    .subtitle span {
+      color: #ff4400;
+    }
+
+    .tape {
+      margin-top: 2rem;
+      font-size: 0.75rem;
+      color: #444;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      animation: blink 1.2s infinite;
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 1.5rem;
+      justify-content: center;
+      margin-top: 2.5rem;
+      flex-wrap: wrap;
+      position: relative;
+      z-index: 20; /* High z-index for buttons */
+    }
+
+    button {
+      padding: 0.8rem 2rem;
+      font-family: 'Creepster', cursive;
+      font-size: 1.3rem;
+      letter-spacing: 2px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: transform 0.1s, box-shadow 0.1s;
+      pointer-events: auto; /* Explicitly enable pointer events */
+    }
+    button:hover { transform: scale(1.07); }
+
+    #tryAgainBtn {
+      background: #1a0000;
+      color: #ff4444;
+      border: 2px solid #ff2200;
+      box-shadow: 0 0 12px #ff220055;
+    }
+    #tryAgainBtn:hover { box-shadow: 0 0 25px #ff2200; }
+
+    #stayBtn {
+      background: #0a0a0a;
+      color: #666;
+      border: 2px solid #333;
+    }
+    #stayBtn:hover { color: #ff0000; border-color: #ff0000; }
+
+    /* Springtrap silhouette in corner */
+    .silhouette {
+      position: fixed;
+      bottom: 0;
+      right: 0;
+      width: clamp(120px, 20vw, 260px);
+      opacity: 0;
+      filter: brightness(0) sepia(1) hue-rotate(60deg) saturate(3);
+      animation: peekIn 6s 1.5s forwards;
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    /* Countdown bar */
+    #countdownBar {
+      position: fixed;
+      bottom: 0; left: 0;
+      height: 4px;
+      background: #ff0000;
+      width: 100%;
+      transform-origin: left;
+      animation: shrink 30s linear forwards;
+    }
+
+    /* ── Keyframes ── */
+    @keyframes glitch {
+      0%,100% { transform: translate(0); }
+      20% { transform: translate(-3px, 1px); }
+      40% { transform: translate(3px, -1px); }
+      60% { transform: translate(-2px, 2px); }
+      80% { transform: translate(2px, -2px); }
+    }
+    @keyframes glitchTop {
+      0%,100% { transform: translate(0); }
+      25% { transform: translate(-4px, 0); }
+      75% { transform: translate(4px, 0); }
+    }
+    @keyframes glitchBot {
+      0%,100% { transform: translate(0); }
+      33% { transform: translate(4px, 0); }
+      66% { transform: translate(-4px, 0); }
+    }
+    @keyframes blink {
+      0%,100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+    @keyframes peekIn {
+      0%   { opacity: 0; transform: translateX(80%); }
+      30%  { opacity: 0.12; transform: translateX(20%); }
+      60%  { opacity: 0.18; transform: translateX(10%); }
+      100% { opacity: 0.22; transform: translateX(0); }
+    }
+    @keyframes shrink {
+      from { transform: scaleX(1); }
+      to   { transform: scaleX(0); }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Noise canvas -->
+<canvas id="noise"></canvas>
+
+<!-- Springtrap silhouette creeping in -->
+<img class="silhouette" src="springtrap_jumpscare.png" alt="" />
+
+<!-- Countdown bar (30 s before auto-redirect back) -->
+<div id="countdownBar"></div>
+
+<div class="content">
+  <div class="glitch" id="mainHeading" data-text="YOU DIED">YOU DIED</div>
+
+  <p class="subtitle">
+    You chose <span>not to try again.</span><br>
+    That's fine.<br>
+    Springtrap doesn't mind waiting.<br><br>
+    <span>He has all the time in the world.</span>
+  </p>
+
+  <p class="tape">▌▌ TAPE ERROR — NIGHT LOG CORRUPTED ▌▌</p>
+
+  <div class="btn-row">
+    <button id="tryAgainBtn" type="button" onclick="window.location.href='index.html'">FACE YOUR FEARS</button>
+    <button id="stayBtn" type="button" onclick="stayHere()">STAY HERE…</button>
+  </div>
+</div>
+
+<script>
+  // Noise animation
+  const noiseCanvas = document.getElementById('noise');
+  const nc = noiseCanvas.getContext('2d');
+  
+  function resizeNoise() {
+    noiseCanvas.width  = window.innerWidth;
+    noiseCanvas.height = window.innerHeight;
+  }
+  window.onresize = resizeNoise;
+  resizeNoise();
+
+  function drawNoise() {
+    const imageData = nc.createImageData(noiseCanvas.width, noiseCanvas.height);
+    const data = imageData.data;
+    for (let i = 0; i < data.length; i += 4) {
+      const v = Math.random() * 255 | 0;
+      data[i] = data[i+1] = data[i+2] = v;
+      data[i+3] = 255;
+    }
+    nc.putImageData(imageData, 0, 0);
+    requestAnimationFrame(drawNoise);
+  }
+  drawNoise();
+
+  function stayHere() {
+    const btn = document.getElementById('stayBtn');
+    btn.textContent = 'He sees you.';
+    btn.style.color = '#ff0000';
+    btn.style.borderColor = '#ff0000';
+    setTimeout(() => {
+      document.body.style.transition = 'opacity 1s';
+      document.body.style.opacity = '0';
+      setTimeout(() => { window.location.href = 'index.html'; }, 1100);
+    }, 2000);
+  }
+
+  // Auto-redirect after 30 s
+  setTimeout(() => {
+    document.body.style.transition = 'opacity 2s';
+    document.body.style.opacity = '0';
+    setTimeout(() => { window.location.href = 'index.html'; }, 2100);
+  }, 30000);
+
+  // Ambient audio
+  window.onclick = () => {
+    try {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sawtooth';
+      osc.frequency.value = 40;
+      gain.gain.setValueAtTime(0.05, ctx.currentTime);
+      gain.gain.linearRampToValueAtTime(0, ctx.currentTime + 30);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + 30);
+    } catch(e) {}
+  };
+</script>
+</body>
+</html>

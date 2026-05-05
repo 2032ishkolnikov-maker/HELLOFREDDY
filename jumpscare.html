@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Horror Auto</title>
+
+  <style>
+    html, body {
+      margin: 0;
+      height: 100%;
+      background: black;
+      overflow: hidden;
+    }
+
+    #static {
+      position: fixed;
+      inset: 0;
+      background: url("https://media.giphy.com/media/oEI9uBYSzLpBK/giphy.gif");
+      background-size: cover;
+      opacity: 0;
+      z-index: 5;
+      pointer-events: none;
+      mix-blend-mode: screen;
+    }
+
+    #jumpscare {
+      position: fixed;
+      inset: 0;
+      display: none;
+      justify-content: center;
+      align-items: center;
+      background: black;
+      z-index: 9999;
+    }
+
+    #scareImg {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0;
+    }
+
+    .flicker {
+      animation: flicker 0.08s infinite;
+    }
+
+    @keyframes flicker {
+      0% { opacity: 1; }
+      50% { opacity: 0.4; }
+      100% { opacity: 1; }
+    }
+  </style>
+</head>
+
+<body>
+
+<div id="static"></div>
+
+<div id="jumpscare">
+  <img id="scareImg">
+</div>
+
+<audio id="scream" src="scream.mp3"></audio>
+
+<script>
+const staticLayer = document.getElementById("static");
+const jumpscare = document.getElementById("jumpscare");
+const scareImg = document.getElementById("scareImg");
+const scream = document.getElementById("scream");
+
+const animatronics = [
+  "freddy.png",
+  "bonnie.png",
+  "chica.png",
+  "foxy.png"
+];
+
+function getRandomAnimatronic() {
+  if (Math.random() < 0.1) return "shadow_freddy.png";
+  return animatronics[Math.floor(Math.random() * animatronics.length)];
+}
+
+function glitchBurst() {
+  const ctx = new (window.AudioContext || window.webkitAudioContext)();
+
+  for (let i = 0; i < 4; i++) {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    osc.type = "square";
+    osc.frequency.value = Math.random() * 1000 + 200;
+
+    gain.gain.value = 0.04;
+
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+
+    osc.start();
+    setTimeout(() => osc.stop(), 80);
+  }
+}
+
+function triggerJumpscare() {
+  staticLayer.style.opacity = 1;
+  glitchBurst();
+
+  setTimeout(() => staticLayer.style.opacity = 0, 120);
+
+  scareImg.src = getRandomAnimatronic();
+
+  jumpscare.style.display = "flex";
+  scareImg.style.opacity = 1;
+
+  scream.currentTime = 0;
+  scream.play().catch(() => {});
+
+  glitchBurst();
+
+  // ⏱ redirect after scare
+  setTimeout(() => {
+    window.location.href = "page2.html";
+  }, 1800);
+}
+
+// 🚨 AUTO START (no button needed)
+window.onload = () => {
+
+  const delay = 2500; // fixed scary delay
+
+  setTimeout(() => {
+    document.body.classList.add("flicker");
+    staticLayer.style.opacity = 0.3;
+    glitchBurst();
+  }, delay - 800);
+
+  setTimeout(triggerJumpscare, delay);
+};
+</script>
+
+</body>
+</html>

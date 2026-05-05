@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Backstory</title>
+
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      background: black;
+      color: red;
+      font-family: "Courier New", monospace;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      overflow: hidden;
+    }
+
+    .text {
+      width: 70%;
+      font-size: 22px;
+      line-height: 1.6;
+      text-shadow: 0 0 10px red;
+    }
+
+    .continue {
+      margin-top: 40px;
+      font-size: 18px;
+      color: white;
+      opacity: 0;
+      animation: fadeIn 3s forwards;
+      animation-delay: 8s;
+    }
+
+    @keyframes fadeIn {
+      to { opacity: 1; }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="text" id="story"></div>
+
+  <div class="continue" id="continue">
+    ▶ Click anywhere to continue
+  </div>
+
+  <script>
+    const storyText = 
+`1987...
+
+Freddy Fazbear's Pizza was once a place of joy.
+Laughter filled the halls. Children smiled.
+
+But something went wrong.
+
+The animatronics started to move...
+Not during the day — but at night.
+
+Security guards never lasted more than a week.
+
+Now, you are the new night guard.
+
+They are watching.
+
+And they remember.`;
+
+    let i = 0;
+    const speed = 40;
+    const storyDiv = document.getElementById("story");
+
+    function typeWriter() {
+      if (i < storyText.length) {
+        storyDiv.innerHTML += storyText.charAt(i);
+        i++;
+        setTimeout(typeWriter, speed);
+      }
+    }
+
+    typeWriter();
+
+    // Click to continue
+    document.body.addEventListener("click", () => {
+      window.location.href = "jumpscare.html";
+    });
+  </script>
+
+</body>
+</html>

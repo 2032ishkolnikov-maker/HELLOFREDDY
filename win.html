@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>6:00 AM</title>
+
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: black;
+      height: 100%;
+      overflow: hidden;
+      font-family: monospace;
+      color: white;
+    }
+
+    #container {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+    }
+
+    /* 🕕 TIME TEXT */
+    #time {
+      font-size: 120px;
+      color: #00ffcc;
+      text-shadow:
+        0 0 20px #00ffcc,
+        0 0 40px #00ffcc,
+        0 0 80px #00ffcc;
+      animation: glow 1.5s infinite alternate;
+    }
+
+    @keyframes glow {
+      from { opacity: 0.8; }
+      to { opacity: 1; }
+    }
+
+    #text {
+      margin-top: 20px;
+      font-size: 24px;
+      opacity: 0.8;
+      letter-spacing: 2px;
+    }
+
+    /* subtle flicker */
+    body {
+      animation: flicker 3s infinite;
+    }
+
+    @keyframes flicker {
+      0%, 100% { opacity: 1; }
+      95% { opacity: 0.9; }
+      97% { opacity: 0.7; }
+      99% { opacity: 1; }
+    }
+
+    /* 🔘 CONTINUE BUTTON */
+    #continueBtn {
+      margin-top: 40px;
+      padding: 12px 25px;
+      background: black;
+      color: #00ffcc;
+      border: 1px solid #00ffcc;
+      cursor: pointer;
+      font-size: 16px;
+      transition: transform 0.6s, background 0.3s;
+    }
+
+    #continueBtn:hover {
+      background: #00ffcc;
+      color: black;
+    }
+
+    /* 🔄 flip animation */
+    .flip {
+      transform: rotateY(90deg);
+    }
+
+  </style>
+</head>
+
+<body>
+
+<div id="container">
+  <div id="time">6:00 AM</div>
+  <div id="text">You survived the night.</div>
+
+  <button id="continueBtn" onclick="goToCredits()">Continue</button>
+</div>
+
+<audio id="winSound" src="win.mp3"></audio>
+
+<script>
+// 🔊 play win sound
+window.onload = () => {
+  const sound = document.getElementById("winSound");
+  sound.volume = 0.5;
+  sound.play().catch(()=>{});
+};
+
+// 🔄 continue → credits
+function goToCredits() {
+  const btn = document.getElementById("continueBtn");
+
+  // flip animation
+  btn.classList.add("flip");
+
+  // go to credits after animation
+  setTimeout(() => {
+    window.location.href = "credits.html";
+  }, 600);
+}
+</script>
+
+</body>
+</html>

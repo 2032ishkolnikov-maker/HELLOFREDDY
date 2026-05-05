@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FNAF Chase – Survive the Night</title>
+  <style>
+    /* ── Global Reset & Font ─────────────────────────────────────── */
+    @import url('https://fonts.googleapis.com/css2?family=Creepster&family=Share+Tech+Mono&display=swap');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #000;
+      color: #fff;
+      font-family: 'Share Tech Mono', monospace;
+      overflow: hidden;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* ── Screens ─────────────────────────────────────────────────── */
+    .screen {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+    }
+
+    /* START SCREEN */
+    #startScreen {
+      background: radial-gradient(ellipse at center, #1a0a00 0%, #000 100%);
+    }
+    #startScreen h1 {
+      font-family: 'Creepster', cursive;
+      font-size: clamp(2rem, 6vw, 5rem);
+      color: #ff4400;
+      text-shadow: 0 0 30px #ff2200, 0 0 60px #ff0000;
+      letter-spacing: 4px;
+      text-align: center;
+      animation: flicker 3s infinite;
+    }
+    #startScreen p {
+      margin-top: 1rem;
+      font-size: clamp(0.75rem, 2vw, 1.1rem);
+      color: #aaa;
+      text-align: center;
+      max-width: 500px;
+      line-height: 1.7;
+    }
+    #startScreen .sub {
+      margin-top: 0.4rem;
+      font-size: clamp(0.65rem, 1.5vw, 0.9rem);
+      color: #666;
+    }
+    #startBtn {
+      margin-top: 2.5rem;
+      padding: 0.9rem 3rem;
+      font-family: 'Creepster', cursive;
+      font-size: 1.6rem;
+      letter-spacing: 2px;
+      background: #8b0000;
+      color: #ffcc00;
+      border: 3px solid #ff4400;
+      border-radius: 6px;
+      cursor: pointer;
+      text-shadow: 0 0 10px #ff8800;
+      box-shadow: 0 0 20px #ff2200;
+      transition: transform 0.1s, box-shadow 0.1s;
+      z-index: 20;
+    }
+    #startBtn:hover {
+      transform: scale(1.07);
+      box-shadow: 0 0 35px #ff4400;
+    }
+
+    /* Debug Log */
+    #debugLog {
+      position: fixed;
+      bottom: 10px;
+      left: 10px;
+      font-size: 10px;
+      color: #444;
+      pointer-events: none;
+      z-index: 100;
+    }
+
+    /* GAME CANVAS WRAPPER */
+    #gameWrapper {
+      position: relative;
+      display: none;
+    }
+    #gameCanvas {
+      display: block;
+      border: 3px solid #333;
+      box-shadow: 0 0 40px #000;
+    }
+
+    /* HUD */
+    #hud {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 14px;
+      background: rgba(0,0,0,0.75);
+      font-size: 1rem;
+      pointer-events: none;
+      z-index: 5;
+    }
+    #hud .label { color: #888; margin-right: 4px; }
+    #timerDisplay { color: #ffcc00; font-size: 1.2rem; font-weight: bold; }
+    #timerDisplay.danger { color: #ff2200; animation: pulse 0.5s infinite; }
+    #statusMsg { color: #ff6600; font-size: 0.85rem; }
+
+    /* JUMPSCARE OVERLAY */
+    #jumpscareOverlay {
+      display: none;
+      position: absolute;
+      inset: 0;
+      z-index: 50;
+      background: #000;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+    }
+    #jumpscareOverlay.active { display: flex; }
+    #jumpscareImg {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      animation: zoomIn 0.15s ease-out forwards;
+    }
+    #jumpscareOverlay::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: rgba(255,0,0,0.35);
+      animation: redFlash 0.3s ease-out forwards;
+    }
+
+    /* WIN SCREEN */
+    #winScreen {
+      display: none;
+      background: radial-gradient(ellipse at center, #001a00 0%, #000 100%);
+    }
+    #winScreen h1 {
+      font-family: 'Creepster', cursive;
+      font-size: clamp(2rem, 6vw, 4.5rem);
+      color: #00ff88;
+      text-shadow: 0 0 30px #00ff44;
+      animation: flicker 4s infinite;
+    }
+    #winScreen p { color: #aaa; margin-top: 1rem; font-size: 1rem; }
+    #playAgainBtn, #playAgainBtnWin {
+      margin-top: 2rem;
+      padding: 0.8rem 2.5rem;
+      font-family: 'Creepster', cursive;
+      font-size: 1.4rem;
+      background: #003300;
+      color: #00ff88;
+      border: 2px solid #00ff44;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: transform 0.1s;
+    }
+    #playAgainBtn:hover, #playAgainBtnWin:hover { transform: scale(1.07); }
+
+    /* DEATH SCREEN */
+    #deathScreen {
+      display: none;
+      background: radial-gradient(ellipse at center, #1a0000 0%, #000 100%);
+    }
+    #deathScreen h1 {
+      font-family: 'Creepster', cursive;
+      font-size: clamp(2.5rem, 7vw, 5.5rem);
+      color: #ff0000;
+      text-shadow: 0 0 40px #ff0000;
+      animation: flicker 2s infinite;
+    }
+    #deathScreen p { color: #888; margin-top: 0.8rem; font-size: 0.95rem; }
+    #deathScreen .survived { color: #ff6600; font-size: 1.1rem; margin-top: 0.5rem; }
+    #deathBtns { display: flex; gap: 1.5rem; margin-top: 2rem; flex-wrap: wrap; justify-content: center; }
+    #playAgainBtn {
+      background: #3a0000;
+      color: #ff4444;
+      border-color: #ff2200;
+    }
+    #iDKBtn {
+      padding: 0.8rem 2.5rem;
+      font-family: 'Creepster', cursive;
+      font-size: 1.4rem;
+      background: #1a1a00;
+      color: #ffcc00;
+      border: 2px solid #ff8800;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: transform 0.1s;
+    }
+    #iDKBtn:hover { transform: scale(1.07); }
+
+    /* ── Keyframe Animations ─────────────────────────────────────── */
+    @keyframes flicker {
+      0%,100% { opacity: 1; }
+      92% { opacity: 1; }
+      93% { opacity: 0.3; }
+      94% { opacity: 1; }
+      96% { opacity: 0.5; }
+      97% { opacity: 1; }
+    }
+    @keyframes pulse {
+      0%,100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+    @keyframes zoomIn {
+      from { transform: scale(1.4); opacity: 0.5; }
+      to   { transform: scale(1);   opacity: 1; }
+    }
+    @keyframes redFlash {
+      0%   { opacity: 1; }
+      100% { opacity: 0; }
+    }
+  </style>
+</head>
+<body>
+
+<div id="debugLog">System Initializing...</div>
+
+<!-- ═══════════════════ START SCREEN ═══════════════════ -->
+<div id="startScreen" class="screen">
+  <h1>FIVE NIGHTS AT FREDDY'S</h1>
+  <p>You're trapped inside <strong>Freddy Fazbear's Pizza</strong>.<br>
+     <strong>Springtrap</strong> is hunting you through the dark corridors.<br>
+     Survive for <strong>60 seconds</strong> to escape.</p>
+  <p class="sub">WASD / Arrow Keys to move &nbsp;|&nbsp; Don't let him catch you.</p>
+  <button id="startBtn" onclick="forceStart()">START NIGHT</button>
+</div>
+
+<!-- ═══════════════════ GAME AREA ═══════════════════ -->
+<div id="gameWrapper">
+  <div id="hud">
+    <span><span class="label">TIME LEFT:</span><span id="timerDisplay">60s</span></span>
+    <span id="statusMsg">He's watching…</span>
+    <span><span class="label">NIGHT</span> 1</span>
+  </div>
+  <canvas id="gameCanvas"></canvas>
+  <div id="jumpscareOverlay">
+    <img id="jumpscareImg" src="springtrap_jumpscare.png" alt="JUMPSCARE" />
+  </div>
+</div>
+
+<!-- ═══════════════════ WIN SCREEN ═══════════════════ -->
+<div id="winScreen" class="screen">
+  <h1>YOU SURVIVED!</h1>
+  <p>6 AM has arrived. Springtrap retreats into the shadows…</p>
+  <p style="margin-top:0.5rem;color:#555;">…for now.</p>
+  <button id="playAgainBtnWin" onclick="location.reload()">PLAY AGAIN</button>
+</div>
+
+<!-- ═══════════════════ DEATH SCREEN ═══════════════════ -->
+<div id="deathScreen" class="screen">
+  <h1>YOU DIED</h1>
+  <p class="survived" id="survivedTime"></p>
+  <p>Springtrap has claimed another soul.</p>
+  <div id="deathBtns">
+    <button id="playAgainBtn" onclick="location.reload()">TRY AGAIN</button>
+    <button id="iDKBtn" onclick="window.location.href='IDK.html'">IDK…</button>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════
+   FNAF CHASE GAME – DEBUGGED & ROBUST VERSION
+   ═══════════════════════════════════════════════════════════════ */
+
+function log(msg) {
+  console.log(msg);
+  const debug = document.getElementById('debugLog');
+  if (debug) debug.textContent = msg;
+}
+
+log("Script loading...");
+
+// ── Global State ─────────────────────────────────────────────────
+let gameActive = false;
+let gameOver = false;
+let timeLeft = 60;
+let lastTime = 0;
+let lastSecond = 0;
+let gracePeriod = 5;
+let frameCount = 0;
+
+// ── DOM refs ─────────────────────────────────────────────────────
+const startScreen      = document.getElementById('startScreen');
+const gameWrapper      = document.getElementById('gameWrapper');
+const canvas           = document.getElementById('gameCanvas');
+const ctx              = canvas.getContext('2d');
+const timerDisplay     = document.getElementById('timerDisplay');
+const statusMsg        = document.getElementById('statusMsg');
+const jumpscareOverlay = document.getElementById('jumpscareOverlay');
+const winScreen        = document.getElementById('winScreen');
+const deathScreen      = document.getElementById('deathScreen');
+const survivedTime     = document.getElementById('survivedTime');
+
+// ── Canvas sizing ─────────────────────────────────────────────────
+const CANVAS_W = Math.min(window.innerWidth  - 20, 900);
+const CANVAS_H = Math.min(window.innerHeight - 60, 650);
+canvas.width  = CANVAS_W;
+canvas.height = CANVAS_H;
+
+// ── Tile system ───────────────────────────────────────────────────
+const TILE = 40;
+const COLS = Math.floor(CANVAS_W / TILE);
+const ROWS = Math.floor(CANVAS_H / TILE);
+
+// ── Colour palette ────────────────────────────────────────────────
+const C = {
+  floor:     '#1a1008',
+  floorAlt:  '#1e1209',
+  wall:      '#0d0d0d',
+  wallEdge:  '#2a1a0a',
+  table:     '#3b1f0a',
+  tableTop:  '#4a2810',
+  stage:     '#1a0a1a',
+  stageFill: '#220d22',
+  carpet:    '#1a0505',
+  tile:      '#0f0f0f',
+  doorway:   '#000',
+  sign:      '#8b0000',
+  signText:  '#ffcc00',
+  ambient:   'rgba(0,255,0,0.04)'
+};
+
+// ── Map ───────────────────────────────────────────────────────────
+let mapGrid = [];
+function buildMap() {
+  for (let r = 0; r < ROWS; r++) {
+    mapGrid[r] = [];
+    for (let c = 0; c < COLS; c++) {
+      mapGrid[r][c] = 1;
+    }
+  }
+  function carve(r1, c1, r2, c2, type = 0) {
+    for (let r = r1; r <= r2; r++)
+      for (let c = c1; c <= c2; c++)
+        if (r >= 0 && r < ROWS && c >= 0 && c < COLS)
+          mapGrid[r][c] = type;
+  }
+  const cw = COLS, rh = ROWS;
+  carve(2, 3, rh - 3, cw - 3);
+  carve(1, Math.floor(cw * 0.3), 3, Math.floor(cw * 0.7), 3);
+  carve(Math.floor(rh * 0.3), 0, Math.floor(rh * 0.7), 3);
+  carve(Math.floor(rh * 0.3), cw - 4, Math.floor(rh * 0.7), cw - 1);
+  carve(rh - 4, 3, rh - 1, cw - 3);
+  carve(1, 0, Math.floor(rh * 0.28), 3);
+  carve(1, cw - 4, Math.floor(rh * 0.28), cw - 1);
+  carve(Math.floor(rh * 0.72), 0, rh - 1, 3);
+  carve(Math.floor(rh * 0.72), cw - 4, rh - 1, cw - 1);
+  for (let r = 5; r < rh - 5; r += 4) {
+    for (let c = 6; c < cw - 6; c += 5) {
+      if (mapGrid[r][c] === 0) mapGrid[r][c] = 2;
+    }
+  }
+}
+buildMap();
+
+function isWalkable(tx, ty) {
+  const c = Math.floor(tx / TILE);
+  const r = Math.floor(ty / TILE);
+  if (r < 0 || r >= ROWS || c < 0 || c >= COLS) return false;
+  return mapGrid[r][c] !== 1;
+}
+
+function canMove(x, y, w, h) {
+  const pad = 4;
+  return (
+    isWalkable(x + pad,     y + pad)     &&
+    isWalkable(x + w - pad, y + pad)     &&
+    isWalkable(x + pad,     y + h - pad) &&
+    isWalkable(x + w - pad, y + h - pad)
+  );
+}
+
+// ── Player ────────────────────────────────────────────────────────
+const PLAYER_SIZE = 18;
+const PLAYER_SPEED = 3.2;
+const player = {
+  x: Math.floor(COLS / 2) * TILE + TILE / 2 - PLAYER_SIZE / 2,
+  y: Math.floor(ROWS / 2) * TILE + TILE / 2 - PLAYER_SIZE / 2,
+  w: PLAYER_SIZE,
+  h: PLAYER_SIZE,
+  facing: 0
+};
+
+// ── Springtrap ────────────────────────────────────────────────────
+const SPRING_SIZE = 26;
+let springtrapImg = null;
+const springtrap = {
+  x: 2 * TILE,
+  y: 2 * TILE,
+  w: SPRING_SIZE,
+  h: SPRING_SIZE,
+  speed: 0.9,
+  angle: 0,
+  pathTimer: 0,
+  pathInterval: 60,
+  path: [],
+  stepIndex: 0
+};
+
+const sImg = new Image();
+sImg.onload = () => { springtrapImg = sImg; log("Assets Loaded."); };
+sImg.onerror = () => { log("Sprite failed to load, using placeholder."); };
+sImg.src = 'springtrap_sprite.png';
+
+// ── Input ─────────────────────────────────────────────────────────
+const keys = {};
+window.addEventListener('keydown', e => { keys[e.key] = true; });
+window.addEventListener('keyup',   e => { keys[e.key] = false; });
+
+// ── Audio ─────────────────────────────────────────────────────────
+let audioCtx = null;
+function initAudio() {
+  try {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    log("Audio context active.");
+  } catch(e) { log("Audio failed."); }
+}
+
+// ── AI ────────────────────────────────────────────────────────────
+function bfsPath(sx, sy, ex, ey) {
+  const sc = Math.floor(sx / TILE);
+  const sr = Math.floor(sy / TILE);
+  const ec = Math.floor(ex / TILE);
+  const er = Math.floor(ey / TILE);
+  if (sc === ec && sr === er) return [];
+  const visited = Array.from({length: ROWS}, () => new Array(COLS).fill(false));
+  const parent  = Array.from({length: ROWS}, () => new Array(COLS).fill(null));
+  const queue   = [[sr, sc]];
+  visited[sr][sc] = true;
+  const dirs = [[0,1],[0,-1],[1,0],[-1,0],[1,1],[1,-1],[-1,1],[-1,-1]];
+  while (queue.length) {
+    const [r, c] = queue.shift();
+    if (r === er && c === ec) {
+      const path = [];
+      let cur = [er, ec];
+      while (cur) {
+        path.unshift(cur);
+        cur = parent[cur[0]][cur[1]];
+      }
+      return path.slice(1);
+    }
+    for (const [dr, dc] of dirs) {
+      const nr = r + dr, nc = c + dc;
+      if (nr < 0 || nr >= ROWS || nc < 0 || nc >= COLS) continue;
+      if (visited[nr][nc] || mapGrid[nr][nc] === 1) continue;
+      if (dr !== 0 && dc !== 0) {
+        if (mapGrid[r][nc] === 1 || mapGrid[nr][c] === 1) continue;
+      }
+      visited[nr][nc] = true;
+      parent[nr][nc] = [r, c];
+      queue.push([nr, nc]);
+    }
+  }
+  return [];
+}
+
+// ── Game Loop Logic ───────────────────────────────────────────────
+function updatePlayer() {
+  let dx = 0, dy = 0;
+  if (keys['w'] || keys['ArrowUp'])    dy -= PLAYER_SPEED;
+  if (keys['s'] || keys['ArrowDown'])  dy += PLAYER_SPEED;
+  if (keys['a'] || keys['ArrowLeft'])  dx -= PLAYER_SPEED;
+  if (keys['d'] || keys['ArrowRight']) dx += PLAYER_SPEED;
+
+  if (dx !== 0 && dy !== 0) {
+    dx *= 0.707; dy *= 0.707;
+  }
+
+  if (canMove(player.x + dx, player.y, player.w, player.h)) player.x += dx;
+  if (canMove(player.x, player.y + dy, player.w, player.h)) player.y += dy;
+  if (dx !== 0 || dy !== 0) player.facing = Math.atan2(dy, dx);
+}
+
+function updateSpringtrap() {
+  if (gracePeriod > 0) return;
+  springtrap.speed += 0.0001; 
+
+  springtrap.pathTimer--;
+  if (springtrap.pathTimer <= 0 || springtrap.path.length === 0) {
+    springtrap.path = bfsPath(springtrap.x, springtrap.y, player.x, player.y);
+    springtrap.stepIndex = 0;
+    springtrap.pathTimer = springtrap.pathInterval;
+  }
+
+  if (springtrap.path.length > 0) {
+    const target = springtrap.path[springtrap.stepIndex];
+    if (target) {
+      const tx = target[1] * TILE + TILE / 2 - springtrap.w / 2;
+      const ty = target[0] * TILE + TILE / 2 - springtrap.h / 2;
+      const dx = tx - springtrap.x;
+      const dy = ty - springtrap.y;
+      const dist = Math.hypot(dx, dy);
+
+      if (dist < 5) {
+        springtrap.stepIndex++;
+        if (springtrap.stepIndex >= springtrap.path.length) {
+          springtrap.path = [];
+        }
+      } else {
+        springtrap.x += (dx / dist) * springtrap.speed;
+        springtrap.y += (dy / dist) * springtrap.speed;
+        springtrap.angle = Math.atan2(dy, dx);
+      }
+    }
+  }
+}
+
+// ── Draw Functions ────────────────────────────────────────────────
+function drawMap() {
+  for (let r = 0; r < ROWS; r++) {
+    for (let c = 0; c < COLS; c++) {
+      const x = c * TILE, y = r * TILE;
+      const t = mapGrid[r][c];
+      if (t === 1) {
+        ctx.fillStyle = C.wall; ctx.fillRect(x, y, TILE, TILE);
+        ctx.strokeStyle = C.wallEdge; ctx.strokeRect(x + 0.5, y + 0.5, TILE - 1, TILE - 1);
+      } else {
+        ctx.fillStyle = ((r + c) % 2 === 0) ? C.floor : C.floorAlt;
+        ctx.fillRect(x, y, TILE, TILE);
+        if (t === 2) {
+          ctx.fillStyle = C.table; ctx.fillRect(x + 4, y + 4, TILE - 8, TILE - 8);
+        }
+      }
+    }
+  }
+  ctx.fillStyle = C.ambient; ctx.fillRect(0, 0, CANVAS_W, CANVAS_H);
+}
+
+function drawPlayer() {
+  ctx.save();
+  ctx.translate(player.x + player.w / 2, player.y + player.h / 2);
+  ctx.rotate(player.facing);
+  ctx.fillStyle = '#00ccff';
+  ctx.fillRect(-player.w / 2, -player.h / 2, player.w, player.h);
+  // Flashlight
+  const grad = ctx.createRadialGradient(0, 0, 0, 0, 0, 150);
+  grad.addColorStop(0, 'rgba(255,255,200,0.3)');
+  grad.addColorStop(1, 'rgba(255,255,200,0)');
+  ctx.fillStyle = grad;
+  ctx.beginPath();
+  ctx.moveTo(0, 0);
+  ctx.arc(0, 0, 150, -0.4, 0.4);
+  ctx.fill();
+  ctx.restore();
+}
+
+function drawSpringtrap() {
+  ctx.save();
+  ctx.translate(springtrap.x + springtrap.w / 2, springtrap.y + springtrap.h / 2);
+  ctx.rotate(springtrap.angle);
+  if (springtrapImg) {
+    ctx.drawImage(springtrapImg, -springtrap.w / 2, -springtrap.h / 2, springtrap.w, springtrap.h);
+  } else {
+    ctx.fillStyle = '#4a7a00';
+    ctx.fillRect(-springtrap.w / 2, -springtrap.h / 2, springtrap.w, springtrap.h);
+  }
+  ctx.restore();
+}
+
+// ── Game Loop ─────────────────────────────────────────────────────
+function gameLoop(timestamp) {
+  if (!gameActive) return;
+  const dt = timestamp - lastTime;
+  lastTime = timestamp;
+  
+  if (timestamp - lastSecond >= 1000) {
+    lastSecond = timestamp;
+    if (gracePeriod > 0) {
+      gracePeriod--;
+      statusMsg.textContent = gracePeriod > 0 ? `He wakes in ${gracePeriod}…` : 'HE\'S COMING!';
+    } else {
+      timeLeft--;
+    }
+    if (timeLeft <= 0) {
+      gameActive = false;
+      gameWrapper.style.display = 'none';
+      winScreen.style.display = 'flex';
+      return;
+    }
+  }
+  timerDisplay.textContent = timeLeft + 's';
+
+  updatePlayer();
+  updateSpringtrap();
+
+  const dist = Math.hypot(player.x - springtrap.x, player.y - springtrap.y);
+  if (dist < 20) {
+    gameActive = false;
+    jumpscareOverlay.style.display = 'flex';
+    setTimeout(() => {
+      jumpscareOverlay.style.display = 'none';
+      gameWrapper.style.display = 'none';
+      survivedTime.textContent = `You survived ${60 - timeLeft}s.`;
+      deathScreen.style.display = 'flex';
+    }, 2000);
+    return;
+  }
+
+  ctx.clearRect(0, 0, CANVAS_W, CANVAS_H);
+  drawMap();
+  drawPlayer();
+  drawSpringtrap();
+  requestAnimationFrame(gameLoop);
+}
+
+// ── Initialization ────────────────────────────────────────────────
+function forceStart() {
+  log("Start button clicked!");
+  try {
+    initAudio();
+    startScreen.style.display = 'none';
+    winScreen.style.display = 'none';
+    deathScreen.style.display = 'none';
+    gameWrapper.style.display = 'block';
+    
+    gameActive = true;
+    gameOver = false;
+    timeLeft = 60;
+    gracePeriod = 5;
+    
+    player.x = Math.floor(COLS / 2) * TILE;
+    player.y = Math.floor(ROWS / 2) * TILE;
+    springtrap.x = 2 * TILE;
+    springtrap.y = 2 * TILE;
+    springtrap.speed = 0.9;
+    
+    requestAnimationFrame(ts => {
+      lastTime = ts;
+      lastSecond = ts;
+      gameLoop(ts);
+    });
+    log("Game loop started.");
+  } catch (err) {
+    log("Error: " + err.message);
+    alert("Critical error: " + err.message);
+  }
+}
+
+window.addEventListener('load', () => {
+  log("Page fully loaded.");
+  const btn = document.getElementById('startBtn');
+  if (btn) {
+    btn.onclick = (e) => {
+      log("Inline click detected.");
+      forceStart();
+    };
+    log("Event listener attached.");
+  } else {
+    log("Button NOT found!");
+  }
+});
+
+// Fallback for immediate execution if load already happened
+if (document.readyState === 'complete') {
+  log("ReadyState complete. Manual init.");
+  const btn = document.getElementById('startBtn');
+  if (btn && !btn.onclick) {
+    btn.onclick = forceStart;
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Game Menu</title>
+
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      background: radial-gradient(circle, #111 40%, #000 100%);
+      color: white;
+      font-family: "Courier New", monospace;
+      overflow: hidden;
+
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+    }
+
+    /* scanlines */
+    body::after {
+      content: "";
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background: repeating-linear-gradient(
+        0deg,
+        rgba(255,255,255,0.03),
+        rgba(255,255,255,0.03) 2px,
+        transparent 2px,
+        transparent 4px
+      );
+      pointer-events: none;
+    }
+
+    @keyframes flicker {
+      0% { opacity: 0.3; }
+      50% { opacity: 1; }
+      100% { opacity: 0.4; }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    #welcome {
+      position: absolute;
+      top: 25px;
+      font-size: 28px;
+      animation: fadeIn 2s ease;
+    }
+
+    #title {
+      font-size: 60px;
+      margin-bottom: 40px;
+      text-shadow: 0 0 10px red, 0 0 20px red;
+      animation: flicker 2s infinite;
+    }
+
+    .btn {
+      padding: 20px 50px;
+      font-size: 26px;
+      color: white;
+      background: black;
+      border: 2px solid red;
+      border-radius: 10px;
+      text-decoration: none;
+      transition: 0.3s;
+    }
+
+    .btn:hover {
+      background: red;
+      color: black;
+      box-shadow: 0 0 20px red;
+      transform: scale(1.1);
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Welcome name -->
+  <div id="welcome"></div>
+
+  <!-- Title -->
+  <div id="title">FAZBEAR SYSTEM</div>
+
+  <!-- START button now goes to story page -->
+  <a href="story.html" class="btn">
+    ▶ START GAME
+  </a>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const fname = params.get("fname");
+    const lname = params.get("lname");
+
+    const welcome = document.getElementById("welcome");
+
+    if (fname && lname) {
+      const text = "Welcome " + fname + " " + lname;
+      let i = 0;
+
+      function type() {
+        if (i < text.length) {
+          welcome.textContent += text.charAt(i);
+          i++;
+          setTimeout(type, 50);
+        }
+      }
+
+      type();
+    }
+  </script>
+
+</body>
+</html>
