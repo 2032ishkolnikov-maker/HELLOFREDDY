@@ -118,6 +118,30 @@
       font-size: 14px;
     }
 
+    #restartBtn {
+      position: fixed;
+      bottom: 60px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 14px 32px;
+      background: #1a0000;
+      color: #ff4444;
+      border: 2px solid #ff2200;
+      border-radius: 6px;
+      font-family: monospace;
+      font-size: 18px;
+      letter-spacing: 3px;
+      cursor: pointer;
+      display: none;
+      z-index: 10001;
+      box-shadow: 0 0 20px #ff220088;
+    }
+    #restartBtn:hover {
+      background: #ff2200;
+      color: black;
+      box-shadow: 0 0 30px #ff2200;
+    }
+
   </style>
 </head>
 
@@ -141,6 +165,9 @@
 </div>
 
 <div id="deathText">YOU DIED</div>
+
+<!-- Restart button — appears 1.5s after the jumpscare -->
+<button id="restartBtn" onclick="window.location.href='index.html'">RESTART</button>
 
 <audio id="ambience" src="creepy.mp3" loop></audio>
 <audio id="dripSound" src="drip.mp3" loop></audio>
@@ -222,8 +249,15 @@ function triggerJumpscare() {
   const scream = document.getElementById("scream");
   scream.currentTime = 0;
   scream.play().catch(()=>{});
+
+  // Show the RESTART button after 1.5 seconds so the jumpscare hits first
+  setTimeout(() => {
+    document.getElementById("restartBtn").style.display = "block";
+  }, 1500);
 }
 </script>
+
+<script src="music.js"></script>
 
 </body>
 </html>

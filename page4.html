@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Night Question</title>
+  <title>Night Check 4</title>
 
   <style>
     html, body {
@@ -13,17 +13,27 @@
       font-family: monospace;
     }
 
+    #static {
+      position: fixed;
+      inset: 0;
+      background: url("https://media.giphy.com/media/oEI9uBYSzLpBK/giphy.gif");
+      background-size: cover;
+      opacity: 0.15;
+      mix-blend-mode: screen;
+    }
+
     #questionBox {
       position: absolute;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
       text-align: center;
+      z-index: 10;
     }
 
     button {
       display: block;
-      margin: 10px auto;
+      margin: 8px auto;
       padding: 12px;
       width: 220px;
       background: black;
@@ -37,31 +47,29 @@
       color: black;
     }
 
-    /* ⏱ TIMER */
-    #timer {
-      position: fixed;
-      top: 20px;
-      right: 30px;
-      font-size: 32px;
-      color: red;
-      text-shadow: 0 0 10px red;
-    }
-
-    /* 💀 jumpscare */
     #jumpscare {
       position: fixed;
       inset: 0;
       display: none;
-      background: black;
       justify-content: center;
       align-items: center;
+      background: black;
       z-index: 9999;
     }
 
-    #jumpscare img {
+    #scareImg {
       width: 100%;
       height: 100%;
       object-fit: cover;
+      animation: shake 0.03s infinite;
+    }
+
+    @keyframes shake {
+      0% { transform: translate(0,0); }
+      25% { transform: translate(10px,-10px); }
+      50% { transform: translate(-10px,10px); }
+      75% { transform: translate(10px,10px); }
+      100% { transform: translate(0,0); }
     }
 
     #deathText {
@@ -71,13 +79,40 @@
       transform: translate(-50%, -50%);
       color: red;
       font-size: 80px;
-      display: none;
+      font-weight: bold;
       z-index: 10000;
+      display: none;
+      text-shadow: 0 0 20px red, 0 0 40px red;
       animation: blink 0.4s infinite;
     }
 
     @keyframes blink {
+      0% { opacity: 1; }
       50% { opacity: 0.2; }
+      100% { opacity: 1; }
+    }
+
+    .drip {
+      position: absolute;
+      width: 2px;
+      height: 20px;
+      background: white;
+      opacity: 0.15;
+      animation: drip linear infinite;
+    }
+
+    @keyframes drip {
+      0% { transform: translateY(-20px); }
+      100% { transform: translateY(100vh); }
+    }
+
+    #whisper {
+      position: fixed;
+      bottom: 20px;
+      width: 100%;
+      text-align: center;
+      opacity: 0.2;
+      font-size: 14px;
     }
 
     #restartBtn {
@@ -103,16 +138,15 @@
       color: black;
       box-shadow: 0 0 30px #ff2200;
     }
-
   </style>
 </head>
 
 <body>
 
-<div id="timer">1:00</div>
+<div id="static"></div>
 
 <div id="questionBox">
-  <h2>Which animatronic is on the stage?</h2>
+  <h2>What runs out as you use the doors and lights?</h2>
 
   <button onclick="answer(0)" id="a0"></button>
   <button onclick="answer(1)" id="a1"></button>
@@ -120,8 +154,10 @@
   <button onclick="answer(3)" id="a3"></button>
 </div>
 
+<div id="whisper"></div>
+
 <div id="jumpscare">
-  <img src="freddy.png">
+  <img id="scareImg" src="freddy.png">
 </div>
 
 <div id="deathText">YOU DIED</div>
@@ -129,12 +165,13 @@
 <!-- Restart button — appears 1.5s after the jumpscare -->
 <button id="restartBtn" onclick="window.location.href='index.html'">RESTART</button>
 
+<audio id="ambience" src="creepy.mp3" loop></audio>
+<audio id="dripSound" src="drip.mp3" loop></audio>
 <audio id="scream" src="scream.mp3"></audio>
 
 <script>
-// answers
-const answers = ["Freddy", "Bonnie", "Chica", "Foxy"];
-const correctAnswer = "Freddy";
+const answers = ["Power", "Time", "Air", "Food"];
+const correctAnswer = "Power";
 
 // shuffle answers
 answers.sort(() => Math.random() - 0.5);
@@ -143,58 +180,64 @@ answers.forEach((a, i) => {
   document.getElementById("a"+i).innerText = a;
 });
 
-// ⏱ TIMER (1 minute)
-let timeLeft = 60;
-let timerInterval;
+const ambience = document.getElementById("ambience");
+const dripSound = document.getElementById("dripSound");
 
-function startTimer() {
-  const timerEl = document.getElementById("timer");
+window.onload = () => {
+  ambience.volume = 0.3;
+  dripSound.volume = 0.2;
 
-  timerInterval = setInterval(() => {
-    timeLeft--;
+  ambience.play().catch(()=>{});
+  dripSound.play().catch(()=>{});
 
-    let minutes = Math.floor(timeLeft / 60);
-    let seconds = timeLeft % 60;
+  startDrips();
+  startWhispers();
+};
 
-    timerEl.innerText =
-      minutes + ":" + (seconds < 10 ? "0" + seconds : seconds);
-
-    // warning
-    if (timeLeft <= 10) {
-      timerEl.style.color = "white";
-      timerEl.style.fontSize = "40px";
-    }
-
-    // 💀 time up
-    if (timeLeft <= 0) {
-      clearInterval(timerInterval);
-      triggerJumpscare();
-    }
-
-  }, 1000);
+function startDrips() {
+  for (let i = 0; i < 40; i++) {
+    const d = document.createElement("div");
+    d.className = "drip";
+    d.style.left = Math.random() * 100 + "vw";
+    d.style.animationDuration = (Math.random()*2+1)+"s";
+    document.body.appendChild(d);
+  }
 }
 
-// 🎯 answer logic
-function answer(index) {
-  clearInterval(timerInterval);
+const whispers = [
+  "watch the meter",
+  "keep the lights low",
+  "doors drain it fast",
+  "do not waste it"
+];
 
+function startWhispers() {
+  setInterval(() => {
+    document.getElementById("whisper").innerText =
+      whispers[Math.floor(Math.random()*whispers.length)];
+  }, 2000);
+}
+
+function answer(index) {
   const chosen = answers[index];
 
   if (chosen === correctAnswer) {
-    window.location.href = "page7.html";
+    window.location.href = "page5.html";
     return;
   }
 
   triggerJumpscare();
 }
 
-// 💀 jumpscare
 function triggerJumpscare() {
   document.getElementById("questionBox").style.display = "none";
+  document.getElementById("whisper").style.display = "none";
+
   document.getElementById("jumpscare").style.display = "flex";
   document.getElementById("deathText").style.display = "block";
 
   const scream = document.getElementById("scream");
+  scream.currentTime = 0;
   scream.play().catch(()=>{});
 
   // Show the RESTART button after 1.5 seconds so the jumpscare hits first
@@ -202,14 +245,8 @@ function triggerJumpscare() {
     document.getElementById("restartBtn").style.display = "block";
   }, 1500);
 }
-
-// start
-window.onload = () => {
-  startTimer();
-};
 </script>
 
 <script src="music.js"></script>
-
 </body>
 </html>

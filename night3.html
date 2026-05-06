@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Night 3 – Foxy</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Creepster&family=Share+Tech+Mono&display=swap');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #000;
+      color: #fff;
+      font-family: 'Share Tech Mono', monospace;
+      overflow: hidden;
+      width: 100vw;
+      height: 100vh;
+      user-select: none;
+    }
+
+    /* Each "screen" fills the whole window. We just hide/show them. */
+    .screen {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 20px;
+    }
+
+    /* ─────────── Start screen ─────────── */
+    #startScreen {
+      background: radial-gradient(ellipse at center, #1a0a00 0%, #000 100%);
+    }
+    #startScreen h1 {
+      font-family: 'Creepster', cursive;
+      font-size: clamp(2rem, 6vw, 5rem);
+      color: #ff4400;
+      text-shadow: 0 0 30px #ff2200, 0 0 60px #ff0000;
+      letter-spacing: 4px;
+      animation: flicker 3s infinite;
+    }
+    @keyframes flicker {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.6; }
+    }
+    #startScreen p {
+      margin-top: 1rem;
+      max-width: 500px;
+      line-height: 1.7;
+      color: #ccc;
+    }
+    .key {
+      display: inline-block;
+      padding: 2px 10px;
+      border: 1px solid #ff4400;
+      border-radius: 4px;
+      color: #ff8866;
+    }
+    button {
+      margin-top: 2rem;
+      padding: 15px 40px;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 1.2rem;
+      background: black;
+      color: #ff4400;
+      border: 2px solid #ff4400;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    button:hover {
+      background: #ff4400;
+      color: black;
+      box-shadow: 0 0 20px #ff4400;
+    }
+
+    /* ─────────── Game screen ─────────── */
+    #gameScreen {
+      display: none;
+      background: #000;
+    }
+
+    /* The hallway is just a CSS perspective trick — two trapezoid walls
+       and a far-away "darkness" rectangle. No image needed. */
+    .hallway {
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse at center 60%, #1a0505 0%, #000 70%),
+        linear-gradient(#0a0a0a, #000);
+    }
+    .hallway::before, .hallway::after {
+      content: "";
+      position: absolute;
+      top: 0; bottom: 0;
+      width: 35%;
+      background: linear-gradient(to right, #1a1a1a, #050505);
+    }
+    .hallway::before { left: 0; transform: skewY(8deg) translateY(-5%); }
+    .hallway::after  { right: 0; transform: skewY(-8deg) translateY(-5%); }
+
+    /* The flashlight beam: a soft white circle that appears when SPACE is held. */
+    #flashlight {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 50% 55%,
+        rgba(255,255,220,0.35) 0%,
+        rgba(255,255,200,0.15) 15%,
+        transparent 30%);
+      opacity: 0;
+      transition: opacity 0.05s;
+      pointer-events: none;
+    }
+    #flashlight.on { opacity: 1; }
+
+    /* HUD: timer top-left, battery top-right. */
+    .hud {
+      position: absolute;
+      top: 20px;
+      padding: 10px 16px;
+      background: rgba(0,0,0,0.6);
+      border: 1px solid #ff4400;
+      border-radius: 6px;
+      font-size: 1.1rem;
+    }
+    #timer { left: 20px; }
+    #batteryBox { right: 20px; min-width: 200px; }
+    .batteryBar {
+      margin-top: 6px;
+      height: 10px;
+      background: #220000;
+      border: 1px solid #ff4400;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .batteryFill {
+      height: 100%;
+      width: 100%;
+      background: linear-gradient(to right, #ff4400, #ffaa00);
+      transition: width 0.1s linear;
+    }
+
+    /* The "!" warning pops up when a noise event is happening. */
+    #noiseAlert {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      font-family: 'Creepster', cursive;
+      font-size: 8rem;
+      color: #ff0000;
+      text-shadow: 0 0 30px #ff0000;
+      opacity: 0;
+      pointer-events: none;
+    }
+    #noiseAlert.show { opacity: 1; animation: pulse 0.4s infinite; }
+    @keyframes pulse {
+      0%, 100% { transform: translate(-50%, -50%) scale(1); }
+      50% { transform: translate(-50%, -50%) scale(1.15); }
+    }
+
+    /* When a noise happens, the whole screen shakes for a fraction of a second. */
+    .shake { animation: shake 0.4s; }
+    @keyframes shake {
+      0%, 100% { transform: translate(0,0); }
+      25% { transform: translate(-6px, 4px); }
+      50% { transform: translate(5px, -4px); }
+      75% { transform: translate(-4px, -3px); }
+    }
+
+    /* ─────────── Win screen ─────────── */
+    #winScreen {
+      display: none;
+      background: radial-gradient(ellipse at center, #001a00 0%, #000 100%);
+    }
+    #winScreen h1 {
+      font-family: 'Creepster', cursive;
+      font-size: clamp(3rem, 10vw, 8rem);
+      color: #44ff44;
+      text-shadow: 0 0 30px #00ff00;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ─────────── START SCREEN ─────────── -->
+  <div id="startScreen" class="screen">
+    <h1>NIGHT 3</h1>
+    <p style="margin-top:1rem;">Foxy is coming down the hallway.</p>
+    <p>When you hear a noise, hold <span class="key">SPACE</span> to flash your light.</p>
+    <p>Don't flash when there's no noise — your battery is precious.</p>
+    <p>Survive 1 minute 30 seconds.</p>
+    <button onclick="startGame()">START NIGHT</button>
+  </div>
+
+  <!-- ─────────── GAME SCREEN ─────────── -->
+  <div id="gameScreen" class="screen">
+    <div class="hallway"></div>
+    <div id="flashlight"></div>
+    <div id="noiseAlert">!</div>
+    <div id="timer" class="hud">Time: 1:30</div>
+    <div id="batteryBox" class="hud">
+      Battery: <span id="batteryPct">100</span>%
+      <div class="batteryBar"><div class="batteryFill" id="batteryFill"></div></div>
+    </div>
+  </div>
+
+  <!-- ─────────── WIN SCREEN ─────────── -->
+  <div id="winScreen" class="screen">
+    <h1>6:00 AM</h1>
+    <p style="margin-top:1rem;">You survived Night 3.</p>
+    <button onclick="window.location.href='night4.html'">CONTINUE</button>
+  </div>
+
+  <script src="music.js"></script>
+  <script>
+    // ─────────── GAME STATE ───────────
+    // These variables hold "what's happening right now" in the game.
+    let battery = 100;            // 0-100, you lose if it hits 0
+    let flashlightOn = false;     // is SPACE currently being held?
+    let gameStartTime = 0;        // when the night started (in ms)
+    let lastFrameTime = 0;        // time of the previous frame (for delta-time)
+    let nextNoiseAt = 0;          // seconds-into-night when the next noise should start
+    let noiseActive = false;      // is there a noise happening right now?
+    let noiseStartTime = 0;       // when the current noise began
+    let noiseHandled = false;     // has the current noise been resolved (flashed or missed)?
+    let gameRunning = false;
+
+    const TOTAL_TIME = 90;        // night length in seconds
+    const REACT_WINDOW = 1.5;     // seconds the player has to flash after a noise
+    const DRAIN_PER_SEC = 2;      // % battery drained per second of holding flashlight
+    const MISS_PENALTY = 5;       // % battery lost when you miss a noise
+
+    // ─────────── AUDIO ───────────
+    // We don't load any sound files. Instead we generate a low rumble
+    // using the Web Audio API. This is the "noise" the player hears.
+    let audioCtx;
+    function playRumble() {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sawtooth';
+      osc.frequency.value = 70 + Math.random() * 30; // varies a little each time
+      gain.gain.setValueAtTime(0.25, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.8);
+      osc.connect(gain).connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.8);
+    }
+
+    // ─────────── INPUT ───────────
+    // Listen for SPACE being pressed and released.
+    // The "if (!e.repeat)" stops the browser from firing keydown over and over
+    // while you hold SPACE — we only care about the first press.
+    document.addEventListener('keydown', (e) => {
+      if (e.code === 'Space' && !e.repeat) {
+        e.preventDefault();
+        flashlightOn = true;
+        document.getElementById('flashlight').classList.add('on');
+      }
+    });
+    document.addEventListener('keyup', (e) => {
+      if (e.code === 'Space') {
+        flashlightOn = false;
+        document.getElementById('flashlight').classList.remove('on');
+      }
+    });
+
+    // ─────────── GAME START ───────────
+    function startGame() {
+      document.getElementById('startScreen').style.display = 'none';
+      document.getElementById('gameScreen').style.display = 'flex';
+
+      battery = 100;
+      gameStartTime = performance.now();
+      lastFrameTime = gameStartTime;
+      nextNoiseAt = 5 + Math.random() * 2; // first noise: 5-7 sec in
+      noiseActive = false;
+      gameRunning = true;
+
+      requestAnimationFrame(loop);
+    }
+
+    // ─────────── MAIN LOOP ───────────
+    // requestAnimationFrame asks the browser to call this function
+    // about 60 times per second. That's our game loop.
+    function loop(now) {
+      if (!gameRunning) return;
+
+      // Delta time = how many seconds passed since the last frame.
+      // We use it so the game runs at the same speed on fast and slow computers.
+      const dt = (now - lastFrameTime) / 1000;
+      lastFrameTime = now;
+
+      const elapsed = (now - gameStartTime) / 1000; // seconds since night started
+      const timeLeft = Math.max(0, TOTAL_TIME - elapsed);
+
+      // 1. Drain battery while flashlight is held.
+      if (flashlightOn) {
+        battery -= DRAIN_PER_SEC * dt;
+      }
+
+      // 2. Should a new noise start?
+      if (!noiseActive && elapsed >= nextNoiseAt) {
+        startNoise(now);
+      }
+
+      // 3. Is the current noise being handled correctly?
+      if (noiseActive && !noiseHandled) {
+        const noiseElapsed = (now - noiseStartTime) / 1000;
+
+        if (flashlightOn) {
+          // Player reacted in time → safe.
+          noiseHandled = true;
+          endNoise(elapsed);
+        } else if (noiseElapsed >= REACT_WINDOW) {
+          // Player missed → lose battery.
+          noiseHandled = true;
+          battery -= MISS_PENALTY;
+          endNoise(elapsed);
+        }
+      }
+
+      // 4. Update what the player sees on screen.
+      updateHUD(timeLeft);
+
+      // 5. Win / lose checks.
+      if (battery <= 0) {
+        gameRunning = false;
+        // Use the existing "YOU DIED" page as the jumpscare.
+        location.href = 'IDK.html';
+        return;
+      }
+      if (timeLeft <= 0) {
+        gameRunning = false;
+        showWin();
+        return;
+      }
+
+      requestAnimationFrame(loop);
+    }
+
+    function startNoise(now) {
+      noiseActive = true;
+      noiseStartTime = now;
+      noiseHandled = false;
+      document.getElementById('noiseAlert').classList.add('show');
+      document.body.classList.add('shake');
+      // Take the shake class off after the animation finishes
+      // so it can play again on the next noise.
+      setTimeout(() => document.body.classList.remove('shake'), 400);
+      playRumble();
+    }
+
+    function endNoise(elapsed) {
+      noiseActive = false;
+      document.getElementById('noiseAlert').classList.remove('show');
+      // Schedule the next noise 5-7 seconds from now.
+      nextNoiseAt = elapsed + 5 + Math.random() * 2;
+    }
+
+    function updateHUD(timeLeft) {
+      // Format time as M:SS
+      const total = Math.ceil(timeLeft);
+      const m = Math.floor(total / 60);
+      const s = total % 60;
+      document.getElementById('timer').textContent =
+        'Time: ' + m + ':' + (s < 10 ? '0' + s : s);
+
+      const pct = Math.max(0, battery);
+      document.getElementById('batteryPct').textContent = Math.ceil(pct);
+      document.getElementById('batteryFill').style.width = pct + '%';
+    }
+
+    function showWin() {
+      document.getElementById('gameScreen').style.display = 'none';
+      document.getElementById('winScreen').style.display = 'flex';
+    }
+  </script>
+</body>
+</html>7

@@ -1,0 +1,137 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## Кто работает над проектом и как помогать
+
+Проект делает мальчик 11 лет. Он изучает программирование и vibe coding, и этот сайт/игра — его учебный проект.
+
+Когда работаешь с ним:
+- **Говори простым языком.** Без сложных терминов без объяснения. Если без термина никак — объясни в одной фразе, что он значит и зачем нужен.
+- **Объясняй "почему", а не только "как".** Когда добавляешь или меняешь код, расскажи: что эта штука делает, зачем она нужна, какие есть альтернативы. Цель — чтобы он понимал, а не просто получал готовый код.
+- **Маленькие шаги.** Лучше сделать одну вещь и обсудить её, чем выкатить большой кусок кода, который трудно разобрать.
+- **Хвали идеи, предлагай альтернативы как варианты, а не как "правильнее".** Это его проект, его выбор.
+- **Не усложняй.** Никаких билд-систем, фреймворков, npm-пакетов, если он сам не попросит. Inline HTML/CSS/JS — это нормально для его уровня и для этого проекта.
+- **Спрашивай, прежде чем переписывать.** Если видишь, что можно сделать сильно по-другому, сначала объясни в чём разница и спроси, хочет ли он так.
+
+## Цель игры и правила
+
+_Этот раздел заполняется вместе с автором. Когда обновляешь — задавай уточняющие вопросы, не додумывай за него._
+
+**Цель проекта:** FNAF-themed game with 5 nights. Each night is a different minigame.
+
+**Главная идея игры:** The player must survive each night. Every night has its own unique mechanic and its own animatronic threat. 2 nights are already built; 3 more to design and build.
+
+**Правила и механики, которых хотим придерживаться:**
+- Each night = one focused minigame with one clear mechanic.
+- Each night has a danger (animatronic) and a tool/skill the player uses to survive.
+- "Mistakes" should always have a cost (battery, time, etc.) — the player should feel tension, not just press buttons safely.
+
+### Nights
+
+**Quiz pages (story / lore checks before the climax):** `page2.html` (Pirate Cove → Foxy), `page3.html` (kitchen → Chica), `page4.html` (power), `page5.html` (backstage → Bonnie), `page6.html` (stage → Freddy, timed), `page7.html` (closing the door → Bonnie, timed).
+
+**Night 1 minigame:** `game.html` (Springtrap chase). Comes AFTER all the quiz pages, after `win.html` and `credits.html`.
+
+**Night 3 — Foxy / Flashlight Hallway** (built — `night3.html`, comes AFTER `game.html`)
+- **Threat:** Foxy. He's coming down the hallway.
+- **Player tool:** A flashlight.
+- **Goal:** Survive 1.5 minutes (90 seconds).
+- **Cues:** When Foxy makes a noise, the player gets BOTH a sound (audio) AND a visual hint (e.g. screen shake / icon).
+- **Correct play:** Flash the light at the moment a noise happens.
+- **Mistakes (both lose battery / advance Foxy):**
+  - Flashing when there was no noise.
+  - NOT flashing when there was a noise.
+- **Battery rules:**
+  - Starts at 100%.
+  - Holding the flashlight ON drains 1% every 0.5 sec (2% per second).
+  - Missing a noise (Foxy advances) costs −5% battery.
+  - Flashing when there's no noise: no extra penalty — wasted battery is the natural punishment.
+- **Reaction window:** 1.5 seconds after a noise starts to flash and stay safe.
+- **Noise frequency:** Random, every 5–7 seconds.
+- **Lose condition:** Battery hits 0 → jumpscare.
+- **Win condition:** Survive 90 seconds.
+- **Tuning note:** Designed to be beatable — a careful player ends with ~70% battery left. Spamming the flashlight drains it before the night ends.
+
+**Night 4 — Freddy / Stay Still** (built — `night4.html`)
+- **Threat:** Freddy. He's in the room, watching you.
+- **Player tool:** Stillness. Don't move the mouse. Don't press keys.
+- **Goal:** Survive 1.5 minutes (90 seconds) without flinching.
+- **Cues:** Random scares (red flash, white flash, eye burst, zoom, lunge, tilt, screen shake, static, whispers, combo) every 6–12 seconds, designed to startle the player into moving.
+- **Mechanics:**
+  - Mouse movement adds fear: 0.08 fear per pixel moved, capped at 8 per frame.
+  - Pressing any key (except modifiers) adds 6 fear instantly.
+  - Fear decays at 1.2/second when staying still — small flinches are recoverable.
+- **Lose condition:** Fear reaches 100 → giant Freddy face jumpscare → redirect to `IDK.html`.
+- **Win condition:** Survive 90 seconds.
+- **Visual:** Freddy is rendered in pure CSS (no images): head, ears, hat, snout, bowtie, body, glowing yellow eyes that follow the cursor. Breathing animation. Subtle moving fog + faint TV scanlines for atmosphere.
+- **Audio:** All scare sounds (boom, sting, rising tone, jumpscare) generated via Web Audio API — no sound files.
+
+**Night 5:** _(to design)_
+
+## Project type
+
+A Five Nights at Freddy's-themed branching narrative built as standalone HTML files. No build system, no package manager, no tests, no framework — every page is a self-contained `.html` file with inline `<style>` and `<script>`. Editing a page = editing the deployed artifact.
+
+## Running locally
+
+Most pages auto-redirect via `window.location.href` after `setTimeout`. This works under both `file://` and `http://`, but use a local server when in doubt:
+
+```bash
+python3 -m http.server 8000
+# then open http://localhost:8000/index.html
+```
+
+Opening `index.html` directly in a browser (`open index.html` on macOS) also works for the basic flow.
+
+## Page flow (the thing you can't see from `ls`)
+
+The narrative is a linear chain of redirects with two terminals (win, death). Page numbers are **not contiguous** — there is no `page4.html`. Don't "fix" this; it's intentional skipping.
+
+```
+index.html  ──form action──▶  page1.html
+                                 │
+                                 ▼ (START button)
+                              story.html
+                                 │
+                                 ▼ (auto-redirect)
+                             jumpscare.html
+                                 │
+                                 ▼
+       page2.html ─▶ page3.html ─▶ page4.html ─▶ page5.html ─▶ page6.html ─▶ page7.html
+                                                                                  │
+                                                                                  ▼
+                                                                              win.html
+                                                                          │
+                                                                          ▼
+                                                                     credits.html
+                                                                       │     │
+                                                                       ▼     ▼
+                                                                 game.html  index.html
+                                                                       │
+                                                            ┌──────────┴──────────┐
+                                                            ▼                     ▼
+                                                     (player wins)           IDK.html ("YOU DIED")
+                                                            │                     │
+                                                            ▼                     ▼ (30s timer)
+                                                     night3.html             index.html
+                                                            │
+                                                            ▼
+                                                     night4.html
+                                                            │
+                                                            ▼
+                                                 (Night 5 coming soon)
+```
+
+`page4.html` was added later, slotted between page3 and page5 (so the page numbering 2,3,4,5,6,7 is contiguous). All 6 quiz pages run before win/credits/game/night3.
+
+`index.html` collects `fname`/`lname` via a GET form to `page1.html` — they appear as URL query params but **nothing reads them**. The form is decorative.
+
+`game.html` is a self-contained Canvas mini-game (`FNAF Chase – Survive the Night`) with its own start/win/death screens. It only connects to the rest of the chain via `credits.html` (entry) and `IDK.html` (on-death exit). Editing the chain pages does not affect game logic, and vice versa.
+
+## Conventions to preserve when editing
+
+- **Single-file pages, with one exception: `music.js`.** Every page is otherwise self-contained. The shared `music.js` file plays ambient creepy music on every page (generated with the Web Audio API, no audio file needed). It's the only shared script — don't extract more without asking.
+- **Google Fonts via CDN.** Pages use `Creepster` and `Share Tech Mono` from `fonts.googleapis.com`. No local font files.
+- **Auto-redirects via `setTimeout` + `window.location.href`.** When adding a new page to the chain, follow the same pattern; don't introduce a router.
+- **Inline event handlers and inline styles** are normal here. Don't refactor to external scripts/stylesheets without a reason.
