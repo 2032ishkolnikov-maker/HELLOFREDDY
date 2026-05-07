@@ -1,92 +1,200 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8" />
   <title>Backstory</title>
-
   <style>
-    body {
-      margin: 0;
-      height: 100vh;
-      background: black;
-      color: red;
-      font-family: "Courier New", monospace;
+    @import url('https://fonts.googleapis.com/css2?family=Creepster&family=Share+Tech+Mono&display=swap');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html, body {
+      min-height: 100%;
+      background: radial-gradient(ellipse at center, #1a0500 0%, #000 100%);
+      color: #ff8866;
+      font-family: 'Share Tech Mono', monospace;
+      /* Allow vertical scroll if the story is taller than the screen,
+         so the continue button never overlaps the text. */
+      overflow-x: hidden;
+      overflow-y: auto;
+      user-select: none;
+    }
+
+    /* Faint red CRT scanlines */
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        rgba(255, 0, 0, 0.04),
+        rgba(255, 0, 0, 0.04) 2px,
+        transparent 2px,
+        transparent 4px
+      );
+      pointer-events: none;
+      z-index: 100;
+    }
+
+    /* Wrapper holds the text AND the button in a column.
+       The button flows AFTER the text — no overlap.
+       If the content fits the screen, it's centered; otherwise the page scrolls. */
+    .wrap {
+      position: relative;
+      width: 100%;
+      min-height: 100vh;
       display: flex;
-      justify-content: center;
+      flex-direction: column;
       align-items: center;
+      justify-content: center;
+      padding: 60px 20px;
+      gap: 60px;
+    }
+
+    /* The story text — much bigger now, responsive via clamp() */
+    #story {
+      width: min(800px, 90%);
+      font-size: clamp(1.3rem, 2.6vw, 1.9rem);
+      line-height: 1.7;
+      letter-spacing: 1px;
+      color: #ff4422;
+      text-shadow: 0 0 10px #ff0000, 0 0 25px #aa0000;
+      white-space: pre-wrap;
       text-align: center;
-      overflow: hidden;
     }
 
-    .text {
-      width: 70%;
-      font-size: 22px;
-      line-height: 1.6;
-      text-shadow: 0 0 10px red;
+    /* Blinking cursor that follows the typed text */
+    #cursor {
+      display: inline-block;
+      width: 12px;
+      background: #ff4422;
+      margin-left: 2px;
+      animation: blink 0.7s steps(1) infinite;
+      box-shadow: 0 0 8px #ff0000;
+    }
+    @keyframes blink {
+      0%, 50%   { opacity: 1; }
+      50.1%, 100% { opacity: 0; }
     }
 
-    .continue {
-      margin-top: 40px;
-      font-size: 18px;
-      color: white;
+    /* Continue button — sits BELOW the text in the document flow.
+       Hidden until typing finishes, then fades in from below. */
+    #continueBtn {
+      padding: 16px 44px;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 1.2rem;
+      letter-spacing: 4px;
+      background: black;
+      color: #ff4400;
+      border: 2px solid #ff4400;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: 0.2s;
       opacity: 0;
-      animation: fadeIn 3s forwards;
-      animation-delay: 8s;
+      pointer-events: none;
     }
-
-    @keyframes fadeIn {
-      to { opacity: 1; }
+    #continueBtn.show {
+      opacity: 1;
+      pointer-events: auto;
+      animation: btnAppear 0.6s ease-out;
+    }
+    @keyframes btnAppear {
+      0%   { opacity: 0; transform: translateY(30px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+    #continueBtn:hover {
+      background: #ff4400;
+      color: black;
+      box-shadow: 0 0 25px #ff4400;
+      transform: scale(1.04);
     }
   </style>
 </head>
-
 <body>
 
-  <div class="text" id="story"></div>
-
-  <div class="continue" id="continue">
-    ▶ Click anywhere to continue
+  <div class="wrap">
+    <div id="story"></div><span id="cursor" style="display:none;"></span>
+    <button id="continueBtn">CONTINUE</button>
   </div>
 
   <script>
-    const storyText = 
+    // ─── The story text ───
+    // Backslash-n line breaks. Blank lines create dramatic pauses.
+    const storyText =
 `1987...
 
 Freddy Fazbear's Pizza was once a place of joy.
 Laughter filled the halls. Children smiled.
+The animatronics sang on stage.
+Freddy. Bonnie. Chica. Foxy.
 
 But something went wrong.
 
-The animatronics started to move...
-Not during the day — but at night.
+Five children went missing one summer.
+The police never found them.
+The animatronics started to smell strange.
+Their eyes seemed... different.
 
-Security guards never lasted more than a week.
+Soon, the animatronics started to move.
+Not during the day — but at night.
+Wandering the halls. Watching the cameras.
+
+The previous guard left only one note:
+"they aren't who they were."
+
+Security guards never last more than a week.
+But the job listings keep coming back.
 
 Now, you are the new night guard.
+12 AM to 6 AM. Five nights.
 
 They are watching.
 
 And they remember.`;
 
+    // ─── Typewriter animation ───
+    // Reveals one character at a time. While typing, the continue button is hidden.
+    // When typing finishes, the button fades in.
     let i = 0;
-    const speed = 40;
+    const SPEED = 38;       // ms per character
+    const NEWLINE_PAUSE = 220; // extra wait at the end of a line for drama
+    let typingDone = false;
+
     const storyDiv = document.getElementById("story");
+    const cursorEl = document.getElementById("cursor");
+    const continueBtn = document.getElementById("continueBtn");
+
+    cursorEl.style.display = 'inline-block';
 
     function typeWriter() {
-      if (i < storyText.length) {
-        storyDiv.innerHTML += storyText.charAt(i);
-        i++;
-        setTimeout(typeWriter, speed);
+      if (i >= storyText.length) {
+        // Typing complete — hide the cursor and reveal the continue button.
+        typingDone = true;
+        cursorEl.style.display = 'none';
+        continueBtn.classList.add('show');
+        // Scroll the button into view smoothly in case the text was tall.
+        continueBtn.scrollIntoView({ behavior: 'smooth', block: 'end' });
+        return;
       }
+      const char = storyText.charAt(i);
+      storyDiv.textContent += char;
+      i++;
+      // Pause longer at the end of a line for dramatic pacing.
+      const delay = (char === '\n') ? NEWLINE_PAUSE : SPEED;
+      setTimeout(typeWriter, delay);
     }
 
     typeWriter();
 
-    // Click to continue
-    document.body.addEventListener("click", () => {
+    // ─── Skip rules ───
+    // Clicking the body or pressing keys does NOTHING while typing is in progress.
+    // The story is only skippable AFTER it has fully revealed itself.
+    // That happens via the continue button (which only appears when typingDone).
+    continueBtn.addEventListener('click', () => {
       window.location.href = "jumpscare.html";
     });
   </script>
 
-<script src="music.js"></script>
+  <script src="music.js"></script>
 </body>
 </html>

@@ -4,145 +4,196 @@
   <title>Night Check</title>
 
   <style>
-    html, body {
-      margin: 0;
-      background: black;
-      height: 100%;
-      overflow: hidden;
-      color: white;
-      font-family: monospace;
-    }
+@import url('https://fonts.googleapis.com/css2?family=Creepster&family=Share+Tech+Mono&display=swap');
 
-    #static {
-      position: fixed;
-      inset: 0;
-      background: url("https://media.giphy.com/media/oEI9uBYSzLpBK/giphy.gif");
-      background-size: cover;
-      opacity: 0.15;
-      mix-blend-mode: screen;
-    }
+* { margin: 0; padding: 0; box-sizing: border-box; }
 
-    #questionBox {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      text-align: center;
-      z-index: 10;
-    }
+html, body {
+  height: 100%;
+  background: radial-gradient(ellipse at center, #1a0500 0%, #000 100%);
+  color: #ff8866;
+  font-family: 'Share Tech Mono', monospace;
+  overflow: hidden;
+  user-select: none;
+}
 
-    button {
-      display: block;
-      margin: 8px auto;
-      padding: 12px;
-      width: 220px;
-      background: black;
-      color: white;
-      border: 1px solid white;
-      cursor: pointer;
-    }
+/* Faint red scanlines for the creepy security-camera feel */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(255, 0, 0, 0.04),
+    rgba(255, 0, 0, 0.04) 2px,
+    transparent 2px,
+    transparent 4px
+  );
+  pointer-events: none;
+  z-index: 100;
+}
 
-    button:hover {
-      background: white;
-      color: black;
-    }
+#static {
+  position: fixed;
+  inset: 0;
+  background: url("https://media.giphy.com/media/oEI9uBYSzLpBK/giphy.gif");
+  background-size: cover;
+  opacity: 0.12;
+  mix-blend-mode: screen;
+}
 
-    #jumpscare {
-      position: fixed;
-      inset: 0;
-      display: none;
-      justify-content: center;
-      align-items: center;
-      background: black;
-      z-index: 9999;
-    }
+#questionBox {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  z-index: 10;
+  width: 90%;
+  max-width: 500px;
+}
 
-    #scareImg {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      animation: shake 0.03s infinite;
-    }
+#questionBox h2 {
+  font-family: 'Creepster', cursive;
+  font-size: clamp(1.6rem, 4.5vw, 3rem);
+  color: #ff2200;
+  text-shadow: 0 0 20px #ff0000, 0 0 50px #aa0000;
+  letter-spacing: 3px;
+  margin-bottom: 30px;
+  animation: questionFlicker 4s infinite;
+}
+@keyframes questionFlicker {
+  0%, 100% { opacity: 1; }
+  3% { opacity: 0.5; }
+  5% { opacity: 1; }
+  50% { opacity: 0.88; }
+}
 
-    @keyframes shake {
-      0% { transform: translate(0,0); }
-      25% { transform: translate(10px,-10px); }
-      50% { transform: translate(-10px,10px); }
-      75% { transform: translate(10px,10px); }
-      100% { transform: translate(0,0); }
-    }
+button {
+  display: block;
+  margin: 12px auto;
+  padding: 14px 20px;
+  width: 260px;
+  background: rgba(20, 0, 0, 0.65);
+  color: #ff8866;
+  border: 2px solid #aa1100;
+  border-radius: 6px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 16px;
+  letter-spacing: 4px;
+  cursor: pointer;
+  transition: all 0.18s;
+  text-transform: uppercase;
+  box-shadow: 0 0 10px rgba(170, 17, 0, 0.4) inset;
+}
+button:hover {
+  background: #ff2200;
+  color: #fff;
+  border-color: #ff4400;
+  box-shadow: 0 0 25px #ff2200;
+  transform: scale(1.05);
+}
 
-    /* 💀 YOU DIED text */
-    #deathText {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      color: red;
-      font-size: 80px;
-      font-weight: bold;
-      z-index: 10000;
-      display: none;
-      text-shadow: 0 0 20px red, 0 0 40px red;
-      animation: blink 0.4s infinite;
-    }
+#jumpscare {
+  position: fixed;
+  inset: 0;
+  display: none;
+  justify-content: center;
+  align-items: center;
+  background: black;
+  z-index: 9999;
+}
 
-    @keyframes blink {
-      0% { opacity: 1; }
-      50% { opacity: 0.2; }
-      100% { opacity: 1; }
-    }
+#scareImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  animation: shake 0.03s infinite;
+}
 
-    /* 💧 drip */
-    .drip {
-      position: absolute;
-      width: 2px;
-      height: 20px;
-      background: white;
-      opacity: 0.15;
-      animation: drip linear infinite;
-    }
+@keyframes shake {
+  0%   { transform: translate(0,0); }
+  25%  { transform: translate(10px,-10px); }
+  50%  { transform: translate(-10px,10px); }
+  75%  { transform: translate(10px,10px); }
+  100% { transform: translate(0,0); }
+}
 
-    @keyframes drip {
-      0% { transform: translateY(-20px); }
-      100% { transform: translateY(100vh); }
-    }
+#deathText {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #ff0000;
+  font-family: 'Creepster', cursive;
+  font-size: clamp(3rem, 10vw, 7rem);
+  font-weight: bold;
+  z-index: 10000;
+  display: none;
+  letter-spacing: 6px;
+  text-shadow: 0 0 30px #ff0000, 0 0 60px #aa0000, 0 0 80px #ff0000;
+  animation: blink 0.4s infinite;
+}
 
-    /* 👁 whisper */
-    #whisper {
-      position: fixed;
-      bottom: 20px;
-      width: 100%;
-      text-align: center;
-      opacity: 0.2;
-      font-size: 14px;
-    }
+@keyframes blink {
+  0%   { opacity: 1; }
+  50%  { opacity: 0.2; }
+  100% { opacity: 1; }
+}
 
-    #restartBtn {
-      position: fixed;
-      bottom: 60px;
-      left: 50%;
-      transform: translateX(-50%);
-      padding: 14px 32px;
-      background: #1a0000;
-      color: #ff4444;
-      border: 2px solid #ff2200;
-      border-radius: 6px;
-      font-family: monospace;
-      font-size: 18px;
-      letter-spacing: 3px;
-      cursor: pointer;
-      display: none;
-      z-index: 10001;
-      box-shadow: 0 0 20px #ff220088;
-    }
-    #restartBtn:hover {
-      background: #ff2200;
-      color: black;
-      box-shadow: 0 0 30px #ff2200;
-    }
+.drip {
+  position: absolute;
+  width: 2px;
+  height: 22px;
+  background: #ff2200;
+  opacity: 0.18;
+  box-shadow: 0 0 4px #ff0000;
+  animation: drip linear infinite;
+}
 
-  </style>
+@keyframes drip {
+  0%   { transform: translateY(-22px); }
+  100% { transform: translateY(100vh); }
+}
+
+#whisper {
+  position: fixed;
+  bottom: 24px;
+  width: 100%;
+  text-align: center;
+  color: #ff4400;
+  font-family: 'Creepster', cursive;
+  font-size: 18px;
+  letter-spacing: 3px;
+  text-shadow: 0 0 10px #ff0000;
+  opacity: 0.45;
+}
+
+#restartBtn {
+  position: fixed;
+  bottom: 60px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 14px 32px;
+  background: #1a0000;
+  color: #ff4444;
+  border: 2px solid #ff2200;
+  border-radius: 6px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 18px;
+  letter-spacing: 3px;
+  cursor: pointer;
+  display: none;
+  z-index: 10001;
+  box-shadow: 0 0 20px #ff220088;
+}
+#restartBtn:hover {
+  background: #ff2200;
+  color: black;
+  box-shadow: 0 0 30px #ff2200;
+  transform: translateX(-50%) scale(1.05);
+}
+</style>
 </head>
 
 <body>
@@ -241,23 +292,23 @@ function answer(index) {
 // 💀 jumpscare
 function triggerJumpscare() {
   document.getElementById("questionBox").style.display = "none";
-  document.getElementById("whisper").style.display = "none";
+  if (document.getElementById("whisper")) {
+    document.getElementById("whisper").style.display = "none";
+  }
 
-  document.getElementById("jumpscare").style.display = "flex";
-  document.getElementById("deathText").style.display = "block";
-
-  const scream = document.getElementById("scream");
-  scream.currentTime = 0;
-  scream.play().catch(()=>{});
-
-  // Show the RESTART button after 1.5 seconds so the jumpscare hits first
-  setTimeout(() => {
-    document.getElementById("restartBtn").style.display = "block";
-  }, 1500);
+  // Run the shared scary jumpscare first (1.1s of face + scream + flashes + shake).
+  // When it fades, show the YOU DIED text and the RESTART button.
+  window.runJumpscare(() => {
+    document.getElementById("deathText").style.display = "block";
+    setTimeout(() => {
+      document.getElementById("restartBtn").style.display = "block";
+    }, 400);
+  });
 }
 </script>
 
 <script src="music.js"></script>
 
+<script src="jumpscare.js"></script>
 </body>
 </html>

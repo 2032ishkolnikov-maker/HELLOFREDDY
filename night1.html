@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Night 1</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Creepster&family=Share+Tech+Mono&display=swap');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #000;
+      color: #fff;
+      font-family: 'Share Tech Mono', monospace;
+      overflow: hidden;
+      width: 100vw;
+      height: 100vh;
+      user-select: none;
+    }
+
+    .screen {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 20px;
+    }
+
+    /* ─────────── Start screen styling (matches night3 / night4) ─────────── */
+    #startScreen {
+      background: radial-gradient(ellipse at center, #1a0a00 0%, #000 100%);
+    }
+    #startScreen h1 {
+      font-family: 'Creepster', cursive;
+      font-size: clamp(2rem, 6vw, 5rem);
+      color: #ff4400;
+      text-shadow: 0 0 30px #ff2200, 0 0 60px #ff0000;
+      letter-spacing: 6px;
+      animation: flicker 3s infinite;
+    }
+    @keyframes flicker {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.55; }
+      55% { opacity: 0.9; }
+    }
+
+    /* The clock-style "12:00 AM" subtitle */
+    .clock {
+      margin-top: 0.5rem;
+      font-family: 'Creepster', cursive;
+      font-size: clamp(1.5rem, 4vw, 3rem);
+      color: #ffaa00;
+      text-shadow: 0 0 20px #ff7700;
+      letter-spacing: 4px;
+    }
+
+    #startScreen p {
+      margin-top: 1rem;
+      max-width: 520px;
+      line-height: 1.7;
+      color: #ccc;
+    }
+    #startScreen .warning {
+      margin-top: 1.4rem;
+      color: #ff6644;
+      font-size: 0.95rem;
+      letter-spacing: 2px;
+    }
+
+    button {
+      margin-top: 2.2rem;
+      padding: 15px 40px;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 1.2rem;
+      background: black;
+      color: #ff4400;
+      border: 2px solid #ff4400;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: 0.2s;
+      letter-spacing: 3px;
+    }
+    button:hover {
+      background: #ff4400;
+      color: black;
+      box-shadow: 0 0 25px #ff4400;
+      transform: scale(1.04);
+    }
+
+    /* Faint scanline overlay for the "old security camera" feel */
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        rgba(255, 255, 255, 0.03),
+        rgba(255, 255, 255, 0.03) 2px,
+        transparent 2px,
+        transparent 4px
+      );
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="startScreen" class="screen">
+    <h1>NIGHT 1</h1>
+    <div class="clock">12:00 AM</div>
+
+    <p style="margin-top:1.4rem;">Welcome to Freddy Fazbear's Pizza.</p>
+    <p>It's your first shift as the night security guard.</p>
+    <p>Stay alert. Watch the cameras. Don't let them reach you.</p>
+
+    <p class="warning">Answer carefully — wrong choices will end your night.</p>
+
+    <button onclick="window.location.href='page2.html'">BEGIN SHIFT</button>
+  </div>
+
+  <script src="music.js"></script>
+</body>
+</html>

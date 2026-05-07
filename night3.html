@@ -18,7 +18,6 @@
       user-select: none;
     }
 
-    /* Each "screen" fills the whole window. We just hide/show them. */
     .screen {
       position: absolute;
       inset: 0;
@@ -48,7 +47,7 @@
     }
     #startScreen p {
       margin-top: 1rem;
-      max-width: 500px;
+      max-width: 540px;
       line-height: 1.7;
       color: #ccc;
     }
@@ -70,11 +69,13 @@
       border-radius: 8px;
       cursor: pointer;
       transition: 0.2s;
+      letter-spacing: 3px;
     }
     button:hover {
       background: #ff4400;
       color: black;
-      box-shadow: 0 0 20px #ff4400;
+      box-shadow: 0 0 25px #ff4400;
+      transform: scale(1.04);
     }
 
     /* ─────────── Game screen ─────────── */
@@ -83,8 +84,7 @@
       background: #000;
     }
 
-    /* The hallway is just a CSS perspective trick — two trapezoid walls
-       and a far-away "darkness" rectangle. No image needed. */
+    /* Hallway: fake perspective with skewed walls + radial darkness */
     .hallway {
       position: absolute;
       inset: 0;
@@ -102,35 +102,159 @@
     .hallway::before { left: 0; transform: skewY(8deg) translateY(-5%); }
     .hallway::after  { right: 0; transform: skewY(-8deg) translateY(-5%); }
 
-    /* The flashlight beam: a soft white circle that appears when SPACE is held. */
+    /* Flashlight beam: only shown when flashlight is ON */
     #flashlight {
       position: absolute;
       inset: 0;
       background: radial-gradient(circle at 50% 55%,
-        rgba(255,255,220,0.35) 0%,
-        rgba(255,255,200,0.15) 15%,
-        transparent 30%);
+        rgba(255,255,220,0.42) 0%,
+        rgba(255,255,200,0.18) 18%,
+        transparent 32%);
       opacity: 0;
       transition: opacity 0.05s;
       pointer-events: none;
+      z-index: 5;
     }
     #flashlight.on { opacity: 1; }
 
-    /* HUD: timer top-left, battery top-right. */
+    /* ─────────── Foxy ─────────── */
+    /* Foxy is built from CSS shapes. He sits at the end of the hallway.
+       Hidden by default; shown only when state === 'VISIBLE'. */
+    #foxy {
+      position: absolute;
+      top: 28%;
+      left: 50%;
+      width: 240px;
+      height: 290px;
+      transform: translate(-50%, 0) scale(0.85);
+      opacity: 0;
+      transition: opacity 0.25s ease-out, transform 0.4s ease-out;
+      pointer-events: none;
+      z-index: 4;
+    }
+    #foxy.show {
+      opacity: 1;
+      transform: translate(-50%, 0) scale(1);
+    }
+    #foxy.lunge {
+      animation: foxyLunge 0.5s forwards;
+    }
+    @keyframes foxyLunge {
+      0%   { transform: translate(-50%, 0) scale(1); opacity: 1; }
+      100% { transform: translate(-50%, 30%) scale(2.6); opacity: 1; }
+    }
+
+    /* Foxy parts */
+    .foxy-ear {
+      position: absolute;
+      top: -10px;
+      width: 70px;
+      height: 95px;
+      background: linear-gradient(to bottom, #6b1a08, #2a0500);
+      z-index: 1;
+    }
+    .foxy-ear.left  { left: 14px;  border-radius: 60% 80% 0 60%; transform: rotate(-18deg); }
+    .foxy-ear.right { right: 14px; border-radius: 80% 60% 60% 0; transform: rotate(18deg); }
+
+    .foxy-head {
+      position: absolute;
+      top: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 200px;
+      height: 200px;
+      background: radial-gradient(ellipse at 50% 30%, #6b2208 0%, #1a0500 75%);
+      border-radius: 50% 50% 45% 45% / 50% 50% 35% 35%;
+      box-shadow: 0 0 30px #00000099 inset, 0 0 40px #aa330055;
+      z-index: 2;
+    }
+
+    .foxy-eye {
+      position: absolute;
+      top: 105px;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      z-index: 3;
+    }
+    .foxy-eye.good {
+      left: calc(50% - 42px);
+      background: radial-gradient(circle, #ffff77 0%, #ffaa00 55%, #aa3300 100%);
+      box-shadow: 0 0 18px #ffaa00, 0 0 35px #ff5500, 0 0 55px #ff3300;
+      animation: eyeGlow 2.2s ease-in-out infinite;
+    }
+    @keyframes eyeGlow {
+      0%, 100% { box-shadow: 0 0 18px #ffaa00, 0 0 35px #ff5500, 0 0 55px #ff3300; }
+      50%      { box-shadow: 0 0 25px #ffcc44, 0 0 50px #ff7700, 0 0 80px #ff4400; }
+    }
+    /* Eyepatch — black square covering one eye, with criss-cross strap lines */
+    .foxy-eye.patch {
+      right: calc(50% - 42px);
+      width: 42px;
+      height: 42px;
+      top: 96px;
+      background: #050000;
+      border: 2px solid #6b1a08;
+      border-radius: 4px;
+    }
+    .foxy-eye.patch::before {
+      content: "";
+      position: absolute;
+      inset: -8px -120px;
+      background: #6b1a08;
+      height: 4px;
+      top: 50%;
+      transform: rotate(-12deg);
+    }
+
+    /* Snout */
+    .foxy-snout {
+      position: absolute;
+      top: 165px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 110px;
+      height: 70px;
+      background: radial-gradient(ellipse at 50% 35%, #3a0a02 0%, #1a0500 100%);
+      border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+      z-index: 3;
+    }
+    /* Sharp teeth — three triangles */
+    .foxy-teeth {
+      position: absolute;
+      top: 215px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 90px;
+      height: 18px;
+      display: flex;
+      justify-content: space-around;
+      z-index: 4;
+    }
+    .foxy-teeth span {
+      width: 14px;
+      height: 18px;
+      background: #ffeedd;
+      clip-path: polygon(50% 100%, 0 0, 100% 0);
+      box-shadow: 0 0 6px #ffffff66;
+    }
+
+    /* HUD */
     .hud {
       position: absolute;
       top: 20px;
       padding: 10px 16px;
-      background: rgba(0,0,0,0.6);
+      background: rgba(0,0,0,0.7);
       border: 1px solid #ff4400;
       border-radius: 6px;
       font-size: 1.1rem;
+      z-index: 10;
     }
     #timer { left: 20px; }
-    #batteryBox { right: 20px; min-width: 200px; }
+    #batteryBox { right: 20px; min-width: 220px; }
     .batteryBar {
       margin-top: 6px;
-      height: 10px;
+      height: 12px;
       background: #220000;
       border: 1px solid #ff4400;
       border-radius: 4px;
@@ -140,37 +264,96 @@
       height: 100%;
       width: 100%;
       background: linear-gradient(to right, #ff4400, #ffaa00);
-      transition: width 0.1s linear;
+      transition: width 0.08s linear, box-shadow 0.2s;
+    }
+    .batteryFill.low {
+      background: linear-gradient(to right, #ff0000, #ff4400);
+      box-shadow: 0 0 12px #ff0000;
+      animation: heartbeat 0.7s infinite;
+    }
+    @keyframes heartbeat {
+      0%, 100% { filter: brightness(1.0); }
+      50%      { filter: brightness(1.4); }
     }
 
-    /* The "!" warning pops up when a noise event is happening. */
+    /* Status banner — appears at the top-center to tell the player what's happening */
+    #statusMsg {
+      position: absolute;
+      top: 80px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-family: 'Creepster', cursive;
+      font-size: 1.6rem;
+      letter-spacing: 4px;
+      color: #ff4400;
+      text-shadow: 0 0 15px #ff2200;
+      opacity: 0;
+      transition: opacity 0.2s;
+      pointer-events: none;
+      z-index: 8;
+    }
+    #statusMsg.show { opacity: 1; }
+    #statusMsg.urgent { color: #ff0000; animation: pulse 0.5s infinite; }
+    @keyframes pulse {
+      0%, 100% { transform: translateX(-50%) scale(1); }
+      50%      { transform: translateX(-50%) scale(1.1); }
+    }
+
+    /* Big "!" warning during NOISE state */
     #noiseAlert {
       position: absolute;
       top: 50%; left: 50%;
       transform: translate(-50%, -50%);
       font-family: 'Creepster', cursive;
-      font-size: 8rem;
+      font-size: 9rem;
       color: #ff0000;
-      text-shadow: 0 0 30px #ff0000;
+      text-shadow: 0 0 30px #ff0000, 0 0 60px #aa0000;
       opacity: 0;
       pointer-events: none;
+      z-index: 7;
     }
-    #noiseAlert.show { opacity: 1; animation: pulse 0.4s infinite; }
-    @keyframes pulse {
+    #noiseAlert.show {
+      opacity: 1;
+      animation: alertPulse 0.4s infinite;
+    }
+    @keyframes alertPulse {
       0%, 100% { transform: translate(-50%, -50%) scale(1); }
-      50% { transform: translate(-50%, -50%) scale(1.15); }
+      50%      { transform: translate(-50%, -50%) scale(1.18); }
     }
 
-    /* When a noise happens, the whole screen shakes for a fraction of a second. */
-    .shake { animation: shake 0.4s; }
-    @keyframes shake {
-      0%, 100% { transform: translate(0,0); }
-      25% { transform: translate(-6px, 4px); }
-      50% { transform: translate(5px, -4px); }
+    /* Screen shake when something scary happens */
+    body.shake { animation: bodyShake 0.4s; }
+    @keyframes bodyShake {
+      0%, 100% { transform: translate(0, 0); }
+      25% { transform: translate(-7px, 5px); }
+      50% { transform: translate(6px, -4px); }
       75% { transform: translate(-4px, -3px); }
     }
 
-    /* ─────────── Win screen ─────────── */
+    /* Death overlay: black screen with "YOU DIED" before redirect */
+    #deathOverlay {
+      position: absolute;
+      inset: 0;
+      display: none;
+      background: black;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+    }
+    #deathOverlay h1 {
+      font-family: 'Creepster', cursive;
+      font-size: clamp(3rem, 10vw, 7rem);
+      color: #ff0000;
+      text-shadow: 0 0 30px #ff0000, 0 0 60px #aa0000, 0 0 80px #ff0000;
+      letter-spacing: 6px;
+      animation: deathBlink 0.4s infinite;
+    }
+    @keyframes deathBlink {
+      0%, 100% { opacity: 1; }
+      50%      { opacity: 0.2; }
+    }
+
+    /* Win screen */
     #winScreen {
       display: none;
       background: radial-gradient(ellipse at center, #001a00 0%, #000 100%);
@@ -188,9 +371,11 @@
   <!-- ─────────── START SCREEN ─────────── -->
   <div id="startScreen" class="screen">
     <h1>NIGHT 3</h1>
-    <p style="margin-top:1rem;">Foxy is coming down the hallway.</p>
-    <p>When you hear a noise, hold <span class="key">SPACE</span> to flash your light.</p>
-    <p>Don't flash when there's no noise — your battery is precious.</p>
+    <p style="margin-top:1rem;">Foxy is in the hallway.</p>
+    <p>When you hear footsteps, hold <span class="key">SPACE</span> to flash your light.</p>
+    <p>You'll see Foxy. <strong>Keep the flashlight on</strong> until he disappears.</p>
+    <p style="color:#ff6644;">If you let go too early — he lunges. If you don't flash at all — he reaches you in the dark.</p>
+    <p style="margin-top:1.2rem;color:#888;">Battery drains while the light is on. Use it only when you have to.</p>
     <p>Survive 1 minute 30 seconds.</p>
     <button onclick="startGame()">START NIGHT</button>
   </div>
@@ -198,13 +383,32 @@
   <!-- ─────────── GAME SCREEN ─────────── -->
   <div id="gameScreen" class="screen">
     <div class="hallway"></div>
+
+    <!-- Foxy (hidden until VISIBLE state) -->
+    <div id="foxy">
+      <div class="foxy-ear left"></div>
+      <div class="foxy-ear right"></div>
+      <div class="foxy-head"></div>
+      <div class="foxy-eye good"></div>
+      <div class="foxy-eye patch"></div>
+      <div class="foxy-snout"></div>
+      <div class="foxy-teeth"><span></span><span></span><span></span><span></span><span></span></div>
+    </div>
+
     <div id="flashlight"></div>
     <div id="noiseAlert">!</div>
+    <div id="statusMsg"></div>
+
     <div id="timer" class="hud">Time: 1:30</div>
     <div id="batteryBox" class="hud">
       Battery: <span id="batteryPct">100</span>%
       <div class="batteryBar"><div class="batteryFill" id="batteryFill"></div></div>
     </div>
+  </div>
+
+  <!-- ─────────── DEATH OVERLAY ─────────── -->
+  <div id="deathOverlay">
+    <h1>YOU DIED</h1>
   </div>
 
   <!-- ─────────── WIN SCREEN ─────────── -->
@@ -216,168 +420,296 @@
 
   <script src="music.js"></script>
   <script>
-    // ─────────── GAME STATE ───────────
-    // These variables hold "what's happening right now" in the game.
-    let battery = 100;            // 0-100, you lose if it hits 0
-    let flashlightOn = false;     // is SPACE currently being held?
-    let gameStartTime = 0;        // when the night started (in ms)
-    let lastFrameTime = 0;        // time of the previous frame (for delta-time)
-    let nextNoiseAt = 0;          // seconds-into-night when the next noise should start
-    let noiseActive = false;      // is there a noise happening right now?
-    let noiseStartTime = 0;       // when the current noise began
-    let noiseHandled = false;     // has the current noise been resolved (flashed or missed)?
-    let gameRunning = false;
+    // ─────────────── CONSTANTS ───────────────
+    const TOTAL_TIME       = 90;    // night length in seconds
+    const DRAIN_PER_SEC    = 3.5;   // battery % drained per second of flashlight ON
+    const REACTION_WINDOW  = 1.5;   // seconds to flash after a noise starts before Foxy reaches you
+    const VISIBLE_DURATION = 2.0;   // seconds Foxy stays visible — flashlight MUST stay on the whole time
+    const NOISE_MIN_GAP    = 7;     // shortest gap between noise events
+    const NOISE_MAX_GAP    = 11;    // longest gap between noise events
+    const COOLDOWN         = 0.8;   // brief calm after Foxy retreats before another noise can fire
 
-    const TOTAL_TIME = 90;        // night length in seconds
-    const REACT_WINDOW = 1.5;     // seconds the player has to flash after a noise
-    const DRAIN_PER_SEC = 2;      // % battery drained per second of holding flashlight
-    const MISS_PENALTY = 5;       // % battery lost when you miss a noise
+    // ─────────────── STATE MACHINE ───────────────
+    // The game is always in exactly one of these states.
+    const S = {
+      IDLE:    'idle',     // dark hallway, no danger
+      NOISE:   'noise',    // Foxy is approaching — flash now!
+      VISIBLE: 'visible',  // Foxy is in the hallway — KEEP flashlight on
+      DEAD:    'dead',     // game over
+      WON:     'won'
+    };
 
-    // ─────────── AUDIO ───────────
-    // We don't load any sound files. Instead we generate a low rumble
-    // using the Web Audio API. This is the "noise" the player hears.
+    let state          = S.IDLE;
+    let stateStart     = 0;        // time (ms) when current state began
+    let battery        = 100;
+    let flashlightOn   = false;
+    let gameStartTime  = 0;
+    let lastFrameTime  = 0;
+    let nextNoiseAt    = 0;        // seconds-into-night when next noise will trigger
+    let gameRunning    = false;
+
+    // ─── DOM refs ───
+    const startScreen   = document.getElementById('startScreen');
+    const gameScreen    = document.getElementById('gameScreen');
+    const winScreen     = document.getElementById('winScreen');
+    const flashlightEl  = document.getElementById('flashlight');
+    const foxyEl        = document.getElementById('foxy');
+    const noiseAlertEl  = document.getElementById('noiseAlert');
+    const statusMsgEl   = document.getElementById('statusMsg');
+    const batteryFill   = document.getElementById('batteryFill');
+    const batteryPct    = document.getElementById('batteryPct');
+    const timerEl       = document.getElementById('timer');
+    const deathOverlay  = document.getElementById('deathOverlay');
+
+    // ─────────────── AUDIO (generated via Web Audio API) ───────────────
     let audioCtx;
-    function playRumble() {
+    function ctx() {
       if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      const osc = audioCtx.createOscillator();
-      const gain = audioCtx.createGain();
-      osc.type = 'sawtooth';
-      osc.frequency.value = 70 + Math.random() * 30; // varies a little each time
-      gain.gain.setValueAtTime(0.25, audioCtx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.8);
-      osc.connect(gain).connect(audioCtx.destination);
+      return audioCtx;
+    }
+    function playTone(freq, dur, type = 'sine', vol = 0.18) {
+      const c = ctx();
+      const osc = c.createOscillator();
+      const gain = c.createGain();
+      osc.type = type;
+      osc.frequency.value = freq;
+      gain.gain.setValueAtTime(vol, c.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.0001, c.currentTime + dur);
+      osc.connect(gain).connect(c.destination);
       osc.start();
-      osc.stop(audioCtx.currentTime + 0.8);
+      osc.stop(c.currentTime + dur);
+    }
+    // A single "thump" footstep
+    function playFootstep() {
+      playTone(50 + Math.random() * 20, 0.18, 'sawtooth', 0.32);
+    }
+    // Footstep loop while in NOISE state — schedules thumps every ~0.32s
+    let footstepIntervals = [];
+    function startFootsteps() {
+      // First thump immediately, then a few more rapidly
+      playFootstep();
+      footstepIntervals.push(setTimeout(playFootstep, 350));
+      footstepIntervals.push(setTimeout(playFootstep, 700));
+      footstepIntervals.push(setTimeout(playFootstep, 1050));
+      footstepIntervals.push(setTimeout(playFootstep, 1400));
+    }
+    function stopFootsteps() {
+      footstepIntervals.forEach(clearTimeout);
+      footstepIntervals = [];
+    }
+    // Low growl while Foxy is visible — sustained low oscillator
+    let growlOsc = null, growlGain = null;
+    function startGrowl() {
+      const c = ctx();
+      growlOsc = c.createOscillator();
+      growlGain = c.createGain();
+      growlOsc.type = 'sawtooth';
+      growlOsc.frequency.value = 65;
+      growlGain.gain.setValueAtTime(0, c.currentTime);
+      growlGain.gain.linearRampToValueAtTime(0.18, c.currentTime + 0.15);
+      growlOsc.connect(growlGain).connect(c.destination);
+      growlOsc.start();
+    }
+    function stopGrowl() {
+      if (!growlGain || !growlOsc) return;
+      const c = ctx();
+      growlGain.gain.linearRampToValueAtTime(0, c.currentTime + 0.2);
+      growlOsc.stop(c.currentTime + 0.25);
+      growlOsc = null;
+      growlGain = null;
+    }
+    // Big jumpscare scream
+    function playJumpscare() {
+      const c = ctx();
+      // Boom
+      playTone(40, 0.7, 'sawtooth', 0.4);
+      // Rising shriek
+      const osc = c.createOscillator();
+      const gain = c.createGain();
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(140, c.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(900, c.currentTime + 0.55);
+      gain.gain.setValueAtTime(0.25, c.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.0001, c.currentTime + 0.6);
+      osc.connect(gain).connect(c.destination);
+      osc.start();
+      osc.stop(c.currentTime + 0.6);
     }
 
-    // ─────────── INPUT ───────────
-    // Listen for SPACE being pressed and released.
-    // The "if (!e.repeat)" stops the browser from firing keydown over and over
-    // while you hold SPACE — we only care about the first press.
+    // ─────────────── INPUT ───────────────
     document.addEventListener('keydown', (e) => {
       if (e.code === 'Space' && !e.repeat) {
         e.preventDefault();
         flashlightOn = true;
-        document.getElementById('flashlight').classList.add('on');
+        flashlightEl.classList.add('on');
       }
     });
     document.addEventListener('keyup', (e) => {
       if (e.code === 'Space') {
         flashlightOn = false;
-        document.getElementById('flashlight').classList.remove('on');
+        flashlightEl.classList.remove('on');
       }
     });
 
-    // ─────────── GAME START ───────────
+    // ─────────────── STATE TRANSITIONS ───────────────
+    function setStatus(text, urgent = false) {
+      statusMsgEl.textContent = text;
+      statusMsgEl.classList.toggle('show', !!text);
+      statusMsgEl.classList.toggle('urgent', urgent);
+    }
+
+    function enterNoise(now) {
+      state = S.NOISE;
+      stateStart = now;
+      noiseAlertEl.classList.add('show');
+      document.body.classList.add('shake');
+      setTimeout(() => document.body.classList.remove('shake'), 400);
+      startFootsteps();
+      setStatus('FOOTSTEPS — FLASH!', true);
+    }
+
+    function enterVisible(now) {
+      state = S.VISIBLE;
+      stateStart = now;
+      noiseAlertEl.classList.remove('show');
+      stopFootsteps();
+      foxyEl.classList.add('show');
+      startGrowl();
+      setStatus('KEEP THE LIGHT ON', true);
+    }
+
+    function exitVisibleSafely(elapsed) {
+      // Foxy retreats — back to IDLE
+      state = S.IDLE;
+      foxyEl.classList.remove('show');
+      stopGrowl();
+      setStatus('');
+      // Schedule next noise after a short calm window
+      nextNoiseAt = elapsed + COOLDOWN + NOISE_MIN_GAP + Math.random() * (NOISE_MAX_GAP - NOISE_MIN_GAP);
+    }
+
+    // ─────────────── GAME START ───────────────
     function startGame() {
-      document.getElementById('startScreen').style.display = 'none';
-      document.getElementById('gameScreen').style.display = 'flex';
+      startScreen.style.display = 'none';
+      gameScreen.style.display = 'flex';
 
       battery = 100;
+      flashlightOn = false;
+      state = S.IDLE;
       gameStartTime = performance.now();
       lastFrameTime = gameStartTime;
-      nextNoiseAt = 5 + Math.random() * 2; // first noise: 5-7 sec in
-      noiseActive = false;
+      nextNoiseAt = 5 + Math.random() * 2;  // first noise: 5–7 sec in
       gameRunning = true;
+
+      // Wake up the audio context with a near-silent tick
+      playTone(50, 0.05, 'sine', 0.001);
 
       requestAnimationFrame(loop);
     }
 
-    // ─────────── MAIN LOOP ───────────
-    // requestAnimationFrame asks the browser to call this function
-    // about 60 times per second. That's our game loop.
+    // ─────────────── MAIN LOOP ───────────────
     function loop(now) {
       if (!gameRunning) return;
-
-      // Delta time = how many seconds passed since the last frame.
-      // We use it so the game runs at the same speed on fast and slow computers.
       const dt = (now - lastFrameTime) / 1000;
       lastFrameTime = now;
 
-      const elapsed = (now - gameStartTime) / 1000; // seconds since night started
+      const elapsed  = (now - gameStartTime) / 1000;
       const timeLeft = Math.max(0, TOTAL_TIME - elapsed);
 
-      // 1. Drain battery while flashlight is held.
+      // 1. Battery drain
       if (flashlightOn) {
         battery -= DRAIN_PER_SEC * dt;
       }
 
-      // 2. Should a new noise start?
-      if (!noiseActive && elapsed >= nextNoiseAt) {
-        startNoise(now);
-      }
-
-      // 3. Is the current noise being handled correctly?
-      if (noiseActive && !noiseHandled) {
-        const noiseElapsed = (now - noiseStartTime) / 1000;
-
+      // 2. State machine
+      if (state === S.IDLE) {
+        if (elapsed >= nextNoiseAt) {
+          enterNoise(now);
+        }
+      } else if (state === S.NOISE) {
+        const noiseElapsed = (now - stateStart) / 1000;
         if (flashlightOn) {
-          // Player reacted in time → safe.
-          noiseHandled = true;
-          endNoise(elapsed);
-        } else if (noiseElapsed >= REACT_WINDOW) {
-          // Player missed → lose battery.
-          noiseHandled = true;
-          battery -= MISS_PENALTY;
-          endNoise(elapsed);
+          // Player flashed — Foxy gets caught in the light → VISIBLE
+          enterVisible(now);
+        } else if (noiseElapsed >= REACTION_WINDOW) {
+          // Player ignored the footsteps — Foxy reaches them in the dark
+          die('reached');
+          return;
+        }
+      } else if (state === S.VISIBLE) {
+        const visibleElapsed = (now - stateStart) / 1000;
+        if (!flashlightOn) {
+          // Player let go too early → Foxy lunges
+          die('lunge');
+          return;
+        }
+        if (visibleElapsed >= VISIBLE_DURATION) {
+          exitVisibleSafely(elapsed);
         }
       }
 
-      // 4. Update what the player sees on screen.
-      updateHUD(timeLeft);
-
-      // 5. Win / lose checks.
+      // 3. Battery 0 = death (no light to fight him off)
       if (battery <= 0) {
-        gameRunning = false;
-        // Use the existing "YOU DIED" page as the jumpscare.
-        location.href = 'IDK.html';
+        die('battery');
         return;
       }
+
+      // 4. Update HUD
+      const pct = Math.max(0, battery);
+      batteryPct.textContent = Math.ceil(pct);
+      batteryFill.style.width = pct + '%';
+      batteryFill.classList.toggle('low', pct < 30);
+
+      const total = Math.ceil(timeLeft);
+      const m = Math.floor(total / 60);
+      const s = total % 60;
+      timerEl.textContent = 'Time: ' + m + ':' + (s < 10 ? '0' + s : s);
+
+      // 5. Win
       if (timeLeft <= 0) {
         gameRunning = false;
-        showWin();
+        win();
         return;
       }
 
       requestAnimationFrame(loop);
     }
 
-    function startNoise(now) {
-      noiseActive = true;
-      noiseStartTime = now;
-      noiseHandled = false;
-      document.getElementById('noiseAlert').classList.add('show');
-      document.body.classList.add('shake');
-      // Take the shake class off after the animation finishes
-      // so it can play again on the next noise.
-      setTimeout(() => document.body.classList.remove('shake'), 400);
-      playRumble();
+    // ─────────────── END STATES ───────────────
+    function die(reason) {
+      gameRunning = false;
+      state = S.DEAD;
+      stopFootsteps();
+      stopGrowl();
+
+      // Helper that runs the shared scary jumpscare, then shows YOU DIED, then redirects.
+      const runScareThenDeath = () => {
+        window.runJumpscare(() => {
+          deathOverlay.style.display = 'flex';
+          setTimeout(() => {
+            window.location.href = 'IDK.html';
+          }, 700);
+        });
+      };
+
+      if (reason === 'lunge') {
+        // Show Foxy's lunge animation first (0.5s), THEN the shared jumpscare
+        foxyEl.classList.add('show');
+        foxyEl.classList.add('lunge');
+        setTimeout(runScareThenDeath, 400);
+      } else {
+        runScareThenDeath();
+      }
     }
 
-    function endNoise(elapsed) {
-      noiseActive = false;
-      document.getElementById('noiseAlert').classList.remove('show');
-      // Schedule the next noise 5-7 seconds from now.
-      nextNoiseAt = elapsed + 5 + Math.random() * 2;
-    }
-
-    function updateHUD(timeLeft) {
-      // Format time as M:SS
-      const total = Math.ceil(timeLeft);
-      const m = Math.floor(total / 60);
-      const s = total % 60;
-      document.getElementById('timer').textContent =
-        'Time: ' + m + ':' + (s < 10 ? '0' + s : s);
-
-      const pct = Math.max(0, battery);
-      document.getElementById('batteryPct').textContent = Math.ceil(pct);
-      document.getElementById('batteryFill').style.width = pct + '%';
-    }
-
-    function showWin() {
-      document.getElementById('gameScreen').style.display = 'none';
-      document.getElementById('winScreen').style.display = 'flex';
+    function win() {
+      state = S.WON;
+      stopFootsteps();
+      stopGrowl();
+      gameScreen.style.display = 'none';
+      winScreen.style.display = 'flex';
     }
   </script>
+<script src="jumpscare.js"></script>
 </body>
-</html>7
+</html>

@@ -440,6 +440,317 @@
       40%  { transform: scale(1.3); opacity: 1; }
       100% { transform: scale(1.0); opacity: 1; }
     }
+
+    /* ═══════════════════ HALLUCINATIONS ═══════════════════ */
+
+    /* Ghostly mini-Freddys that pop up at random spots — "are you seeing things?" */
+    .ghost-freddy {
+      position: absolute;
+      width: 90px; height: 120px;
+      pointer-events: none;
+      opacity: 0;
+      filter: blur(2px);
+      z-index: 7;
+      animation: ghostPop 0.5s ease-out forwards;
+    }
+    .ghost-freddy .gf-head {
+      position: absolute;
+      width: 100%; height: 80px;
+      top: 10px;
+      background: radial-gradient(ellipse at 50% 30%, #2a1a08, #0a0500 80%);
+      border-radius: 50%;
+    }
+    .ghost-freddy .gf-eyes {
+      position: absolute;
+      top: 38px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 18px;
+      z-index: 1;
+    }
+    .ghost-freddy .gf-eyes div {
+      width: 10px; height: 10px;
+      background: #ff6600;
+      border-radius: 50%;
+      box-shadow: 0 0 10px #ff3300, 0 0 20px #ff0000;
+    }
+    @keyframes ghostPop {
+      0%   { opacity: 0; transform: scale(0.6); }
+      30%  { opacity: 0.75; transform: scale(1); }
+      70%  { opacity: 0.5; transform: scale(1.05); }
+      100% { opacity: 0; transform: scale(1); }
+    }
+
+    /* Pairs of red eyes opening in the dark */
+    .eye-pair {
+      position: absolute;
+      display: flex;
+      gap: 24px;
+      pointer-events: none;
+      opacity: 0;
+      z-index: 7;
+      animation: eyePairPop 0.6s ease-out forwards;
+    }
+    .eye-pair div {
+      width: 14px; height: 14px;
+      background: radial-gradient(circle, #ffeeee, #ff0000);
+      border-radius: 50%;
+      box-shadow: 0 0 18px #ff0000, 0 0 35px #ff0000;
+    }
+    @keyframes eyePairPop {
+      0%   { opacity: 0; }
+      20%  { opacity: 1; }
+      80%  { opacity: 1; }
+      100% { opacity: 0; }
+    }
+
+    /* Blood splatter overlay */
+    .blood-splat {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0;
+      z-index: 11;
+      background:
+        radial-gradient(ellipse 250px 130px at 25% 20%, #800000 0%, transparent 70%),
+        radial-gradient(ellipse 300px 160px at 75% 60%, #5a0000 0%, transparent 70%),
+        radial-gradient(circle 180px at 50% 85%, #500000 0%, transparent 70%);
+      animation: bloodSplat 0.7s ease-out forwards;
+      mix-blend-mode: multiply;
+    }
+    @keyframes bloodSplat {
+      0%   { opacity: 0; transform: scale(0.5); }
+      30%  { opacity: 0.95; transform: scale(1); }
+      100% { opacity: 0; transform: scale(1.1); }
+    }
+
+    /* Big "BEHIND YOU" / "RUN" warning text flashes */
+    .warning-text {
+      position: absolute;
+      top: 35%; left: 50%;
+      transform: translate(-50%, -50%);
+      font-family: 'Creepster', cursive;
+      font-size: clamp(2.5rem, 9vw, 6rem);
+      color: #ff0000;
+      text-shadow: 0 0 30px #ff0000, 0 0 60px #aa0000, 0 0 100px #ff0000;
+      letter-spacing: 6px;
+      pointer-events: none;
+      opacity: 0;
+      z-index: 9;
+      animation: warnShow 0.8s ease-out forwards;
+    }
+    @keyframes warnShow {
+      0%   { opacity: 0; transform: translate(-50%, -50%) scale(0.7); }
+      30%  { opacity: 1; transform: translate(-50%, -50%) scale(1.15); }
+      70%  { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+      100% { opacity: 0; transform: translate(-50%, -50%) scale(1.1); }
+    }
+
+    /* Heartbeat full-screen red pulse */
+    .heartbeat-pulse {
+      position: absolute;
+      inset: 0;
+      background: #ff0000;
+      pointer-events: none;
+      opacity: 0;
+      z-index: 11;
+      animation: heartbeatPulse 1.2s ease-out forwards;
+    }
+    @keyframes heartbeatPulse {
+      0%   { opacity: 0; }
+      15%  { opacity: 0.5; }
+      30%  { opacity: 0.05; }
+      45%  { opacity: 0.5; }
+      60%  { opacity: 0.05; }
+      75%  { opacity: 0.4; }
+      100% { opacity: 0; }
+    }
+
+    /* "Other animatronic" hallucination heads that flash on screen */
+    .alt-head {
+      position: absolute;
+      top: 28%; left: 50%;
+      width: 220px; height: 220px;
+      border-radius: 50%;
+      pointer-events: none;
+      opacity: 0;
+      z-index: 8;
+      animation: altHeadFlash 0.45s ease-out forwards;
+      box-shadow: 0 0 40px #00000099 inset;
+    }
+    @keyframes altHeadFlash {
+      0%   { opacity: 0; transform: translate(-50%, 0) scale(0.5); }
+      40%  { opacity: 0.9; transform: translate(-50%, 0) scale(1.25); }
+      100% { opacity: 0; transform: translate(-50%, 0) scale(0.95); }
+    }
+    .alt-foxy   { background: radial-gradient(circle at 50% 35%, #6b1a08, #1a0500 75%); }
+    .alt-bonnie { background: radial-gradient(circle at 50% 35%, #3a3a6a, #0a0a1a 75%); }
+    .alt-chica  { background: radial-gradient(circle at 50% 35%, #aaaa30, #4a4a10 75%); }
+    .alt-head .alt-eye {
+      position: absolute;
+      top: 35%;
+      width: 28px; height: 28px;
+      background: radial-gradient(circle, #ffffff, #ff0000);
+      border-radius: 50%;
+      box-shadow: 0 0 20px #ff0000, 0 0 40px #ff0000;
+    }
+    .alt-head .alt-eye.l { left: 28%; }
+    .alt-head .alt-eye.r { right: 28%; }
+
+    /* HUD glitch — boxes shake and turn red briefly */
+    #timer.glitch, #fearBox.glitch {
+      animation: hudGlitch 0.45s linear;
+      color: #ff0000;
+      border-color: #ff0000;
+    }
+    @keyframes hudGlitch {
+      0%, 100% { transform: translate(0, 0); }
+      20% { transform: translate(-4px, 2px); filter: hue-rotate(180deg); }
+      40% { transform: translate(3px, -3px); filter: invert(1); }
+      60% { transform: translate(-3px, 3px); filter: hue-rotate(-90deg); }
+      80% { transform: translate(2px, -1px); }
+    }
+
+    /* Freddy "teleport" — flickers to one side and back */
+    #freddyWrap.teleport {
+      animation: teleportFlicker 0.5s steps(6, end);
+    }
+    @keyframes teleportFlicker {
+      0%   { opacity: 1; transform: translateX(-50%) scale(1.02); }
+      20%  { opacity: 0.0; transform: translateX(calc(-50% - 120px)) scale(1.02); }
+      40%  { opacity: 0.6; transform: translateX(calc(-50% - 60px)) scale(1.02); }
+      60%  { opacity: 0.0; transform: translateX(calc(-50% + 120px)) scale(1.02); }
+      80%  { opacity: 0.6; transform: translateX(calc(-50% + 60px)) scale(1.02); }
+      100% { opacity: 1; transform: translateX(-50%) scale(1.02); }
+    }
+
+    /* Color-invert flash — entire game inverts colors briefly (very disorienting) */
+    body.invert-flash { animation: invertOnce 0.25s ease-out; }
+    @keyframes invertOnce {
+      0%   { filter: none; }
+      30%  { filter: invert(1) hue-rotate(180deg); }
+      100% { filter: none; }
+    }
+
+    /* ═══════════════════ TOY BONNIE ═══════════════════ */
+    /* Tiny purple Bonnie who floats around the screen and tempts you.
+       Cursor near him → he glows green (he's happy).
+       He shows speech bubbles asking you to press keys for HARDER MODE. */
+    #toyBonnie {
+      position: absolute;
+      width: 70px;
+      height: 110px;
+      pointer-events: none;
+      z-index: 6;
+      transition: filter 0.25s ease-out;
+      filter: drop-shadow(0 0 10px #6633aa);
+    }
+    #toyBonnie.happy {
+      filter: drop-shadow(0 0 18px #88ff66) drop-shadow(0 0 30px #44ff44);
+    }
+    #toyBonnie .tb-ear {
+      position: absolute;
+      width: 18px;
+      height: 50px;
+      background: linear-gradient(to bottom, #8855cc, #2a1855);
+      border-radius: 50% 50% 25% 25% / 60% 60% 40% 40%;
+    }
+    #toyBonnie .tb-ear.left  { top: 0; left: 14px;  transform: rotate(-7deg); }
+    #toyBonnie .tb-ear.right { top: 0; right: 14px; transform: rotate(7deg); }
+    #toyBonnie .tb-head {
+      position: absolute;
+      top: 35px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 60px;
+      height: 55px;
+      background: radial-gradient(circle at 50% 35%, #aa77dd 0%, #4a2880 80%);
+      border-radius: 50%;
+      box-shadow: 0 0 12px #00000088 inset;
+    }
+    #toyBonnie .tb-eye {
+      position: absolute;
+      top: 53px;
+      width: 9px;
+      height: 9px;
+      background: radial-gradient(circle, #ffeeff, #ff0066 70%);
+      border-radius: 50%;
+      box-shadow: 0 0 6px #ff0066, 0 0 12px #ff0066;
+      z-index: 2;
+    }
+    #toyBonnie .tb-eye.left  { left: calc(50% - 14px); }
+    #toyBonnie .tb-eye.right { right: calc(50% - 14px); }
+    #toyBonnie .tb-bowtie {
+      position: absolute;
+      top: 80px;
+      left: 50%;
+      width: 30px;
+      height: 12px;
+      transform: translateX(-50%);
+      background: #ff3366;
+      clip-path: polygon(0 50%, 30% 0, 30% 100%, 70% 0, 70% 100%, 100% 50%);
+      box-shadow: 0 0 6px #ff3366;
+    }
+
+    /* Speech bubble that floats next to Bonnie with key prompts */
+    #bonnieSpeech {
+      position: absolute;
+      width: 200px;
+      pointer-events: none;
+      z-index: 6;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 12px;
+      background: rgba(40, 5, 60, 0.92);
+      color: #ffaaff;
+      border: 1px solid #ff66ff;
+      border-radius: 8px;
+      padding: 8px 10px;
+      box-shadow: 0 0 18px #ff00ff66;
+      opacity: 0;
+      transition: opacity 0.3s;
+      text-align: center;
+      text-shadow: 0 0 4px #ff00ff;
+    }
+    #bonnieSpeech.show { opacity: 0.95; }
+    #bonnieSpeech .key-hint {
+      display: inline-block;
+      background: #2a0044;
+      color: #ffeeff;
+      padding: 3px 9px;
+      border-radius: 4px;
+      border: 1px solid #ff66ff;
+      margin: 0 4px 4px 4px;
+      font-weight: bold;
+      font-size: 14px;
+      box-shadow: 0 0 6px #ff66ff66;
+    }
+    #bonnieSpeech .activated {
+      color: #ff4488;
+      font-weight: bold;
+      letter-spacing: 2px;
+    }
+
+    /* "HARD MODE" indicator pinned bottom-left, listing active effects */
+    #hardModeBox {
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
+      padding: 8px 12px;
+      background: rgba(40, 0, 60, 0.7);
+      border: 1px solid #ff66ff;
+      border-radius: 6px;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 11px;
+      color: #ffaaff;
+      letter-spacing: 1px;
+      z-index: 10;
+      max-width: 260px;
+      line-height: 1.5;
+      display: none;
+    }
+    #hardModeBox.show { display: block; }
+    #hardModeBox .label { color: #ff66ff; font-weight: bold; letter-spacing: 2px; }
   </style>
 </head>
 <body>
@@ -452,6 +763,7 @@
     <p>Keep your mouse on the orange dot. Don't press any keys.</p>
     <p>He will try to scare you. Don't flinch. Survive 1 minute 30 seconds.</p>
     <p style="margin-top:1.2rem;color:#888;">If you flinch too much, he gets you.</p>
+    <p style="margin-top:0.6rem;color:#cc88ff;">Watch out for the toy Bonnie. He'll try to make you press keys. Don't.</p>
     <button onclick="startGame()">FACE FREDDY</button>
   </div>
 
@@ -486,6 +798,20 @@
     <div class="flashRed"    id="flashRed"></div>
     <div class="flashWhite"  id="flashWhite"></div>
     <div class="staticBurst" id="staticBurst"></div>
+
+    <!-- Toy Bonnie — floats around, taunts you with key prompts to make the game harder -->
+    <div id="toyBonnie">
+      <div class="tb-ear left"></div>
+      <div class="tb-ear right"></div>
+      <div class="tb-head"></div>
+      <div class="tb-eye left"></div>
+      <div class="tb-eye right"></div>
+      <div class="tb-bowtie"></div>
+    </div>
+    <div id="bonnieSpeech"></div>
+
+    <!-- Lists active hard-mode effects after Bonnie's keys are pressed -->
+    <div id="hardModeBox"><span class="label">HARD MODE:</span> <span id="hardModeList">none</span></div>
   </div>
 
   <!-- ─────────── DEATH JUMPSCARE OVERLAY ─────────── -->
@@ -611,7 +937,9 @@
       lastMouseY = e.clientY;
 
       // Add fear, but cap per movement so a quick swipe isn't fatal.
-      const add = Math.min(dist * FEAR_PER_PIXEL, MAX_FEAR_PER_FRAME);
+      // Hard mode "doubleFear" doubles the fear per pixel — every wiggle hurts.
+      const fppMul = hardMode.doubleFear ? 2 : 1;
+      const add = Math.min(dist * FEAR_PER_PIXEL * fppMul, MAX_FEAR_PER_FRAME * fppMul);
       fear += add;
 
       // Move Freddy's pupils to track the cursor (creepy).
@@ -624,12 +952,125 @@
       pupilR.style.transform = `translate(calc(-50% + ${ox}px), calc(-50% + ${oy}px))`;
     });
 
+    // ─────────────── TOY BONNIE ───────────────
+    // A small purple Bonnie floats around the screen.
+    // He shows speech bubbles asking you to press keys to make the game HARDER.
+    // Pressing those keys still costs FEAR_PER_KEY (so you're double-punished),
+    // but it also activates a permanent harder-mode effect for the rest of the night.
+
+    const bonnieEl = document.getElementById('toyBonnie');
+    const bonnieSpeechEl = document.getElementById('bonnieSpeech');
+    const hardModeBox = document.getElementById('hardModeBox');
+    const hardModeList = document.getElementById('hardModeList');
+
+    let bonnie = {
+      x: 100, y: 200,
+      tx: 100, ty: 200,    // target the bonnie is moving toward
+      retargetTimer: 0
+    };
+    // Note: lastMouseX/lastMouseY are already declared up in GAME STATE,
+    // so we can read them directly to know where the player's cursor is.
+
+    // Hard-mode flags — turned on by pressing Bonnie's prompted keys
+    const hardMode = {
+      fastScares: false,   // scares fire much more often
+      doubleFear: false,   // mouse movement adds 2x fear
+      noDecay:    false,   // fear doesn't drain — every flinch counts forever
+      chaos:      false    // every scare is now a meaner combo scare
+    };
+
+    // The four prompts Bonnie cycles through
+    const bonniePrompts = [
+      { key: 'Q', flag: 'fastScares', text: 'FASTER scares!' },
+      { key: 'F', flag: 'doubleFear', text: 'DOUBLE the fear!' },
+      { key: 'N', flag: 'noDecay',    text: 'NO RELAXING — fear stays!' },
+      { key: 'C', flag: 'chaos',      text: 'CHAOS — combo scares only!' }
+    ];
+    let currentPrompt = null;
+
+    function showBonniePrompt() {
+      // Pick a prompt that's not already active. If all four are on, hide bubble.
+      const inactive = bonniePrompts.filter(p => !hardMode[p.flag]);
+      if (inactive.length === 0) {
+        bonnieSpeechEl.classList.remove('show');
+        currentPrompt = null;
+        return;
+      }
+      currentPrompt = inactive[Math.floor(Math.random() * inactive.length)];
+      bonnieSpeechEl.innerHTML =
+        `<span class="key-hint">${currentPrompt.key}</span><br>${currentPrompt.text}`;
+      bonnieSpeechEl.classList.add('show');
+    }
+
+    function activateHardMode(prompt) {
+      hardMode[prompt.flag] = true;
+      bonnieSpeechEl.innerHTML =
+        `<span class="key-hint">${prompt.key}</span><br><span class="activated">ACTIVATED</span>`;
+      // Refresh the hard-mode list display
+      const labelMap = {
+        fastScares: 'FASTER',
+        doubleFear: '2× FEAR',
+        noDecay:    'NO REST',
+        chaos:      'CHAOS'
+      };
+      const active = Object.keys(hardMode).filter(k => hardMode[k]).map(k => labelMap[k]);
+      hardModeList.textContent = active.join(' • ');
+      hardModeBox.classList.add('show');
+      // Pick a new prompt after a short delay
+      setTimeout(showBonniePrompt, 1500);
+    }
+
+    function pickNewBonnieTarget() {
+      // Stay 80px from screen edges so Bonnie doesn't hide off-screen
+      bonnie.tx = 80 + Math.random() * (window.innerWidth - 230);
+      bonnie.ty = 80 + Math.random() * (window.innerHeight - 250);
+      bonnie.retargetTimer = 2 + Math.random() * 2.5;
+    }
+
+    function updateBonnie(dt) {
+      bonnie.retargetTimer -= dt;
+      if (bonnie.retargetTimer <= 0) pickNewBonnieTarget();
+
+      // Smoothly slide toward target (ease)
+      const speed = 1.5 + (hardMode.fastScares ? 1 : 0); // float faster in hard mode
+      const dx = bonnie.tx - bonnie.x;
+      const dy = bonnie.ty - bonnie.y;
+      const dist = Math.hypot(dx, dy);
+      if (dist > 0.5) {
+        bonnie.x += (dx / dist) * speed;
+        bonnie.y += (dy / dist) * speed;
+      }
+      bonnieEl.style.left = bonnie.x + 'px';
+      bonnieEl.style.top  = bonnie.y + 'px';
+
+      // Speech bubble follows below Bonnie
+      bonnieSpeechEl.style.left = (bonnie.x - 65) + 'px';
+      bonnieSpeechEl.style.top  = (bonnie.y + 120) + 'px';
+
+      // Cursor near Bonnie? He glows green.
+      const ddx = (bonnie.x + 35) - lastMouseX;
+      const ddy = (bonnie.y + 55) - lastMouseY;
+      const mDist = Math.hypot(ddx, ddy);
+      bonnieEl.classList.toggle('happy', mDist < 90);
+    }
+
+    // Cycle prompts every 7 seconds
+    setInterval(() => {
+      if (gameRunning && !currentPrompt) showBonniePrompt();
+    }, 7000);
+
     // Any key press = startle = big fear bump.
+    // Plus: if it matches Bonnie's current prompt, activate that hard-mode effect.
     document.addEventListener('keydown', (e) => {
       if (!gameRunning) return;
       // Don't punish modifier-only presses (like just "shift")
       if (['Shift', 'Control', 'Alt', 'Meta'].includes(e.key)) return;
       fear += FEAR_PER_KEY;
+
+      // Did the player press Bonnie's currently-shown key?
+      if (currentPrompt && e.key.toUpperCase() === currentPrompt.key) {
+        activateHardMode(currentPrompt);
+      }
     });
 
     // ─────────────── GAME START ───────────────
@@ -644,6 +1085,15 @@
       lastFrameTime = gameStartTime;
       nextScareAt = SCARE_MIN_GAP + Math.random() * (SCARE_MAX_GAP - SCARE_MIN_GAP);
       gameRunning = true;
+
+      // Reset hard mode + Bonnie position
+      Object.keys(hardMode).forEach(k => hardMode[k] = false);
+      hardModeBox.classList.remove('show');
+      hardModeList.textContent = 'none';
+      bonnie.x = 100; bonnie.y = 200;
+      pickNewBonnieTarget();
+      // First prompt appears 3 seconds in so the player can settle first
+      setTimeout(() => { if (gameRunning) showBonniePrompt(); }, 3000);
 
       // Tickle the audio context so later sounds work
       playTone(50, 0.05, 'sine', 0.001);
@@ -661,12 +1111,21 @@
       timeLeft = Math.max(0, TOTAL_TIME - elapsed);
 
       // Fear slowly leaks away when the player is calm.
-      fear = Math.max(0, fear - FEAR_DECAY * dt);
+      // Hard mode "noDecay" turns this off entirely — every flinch is permanent.
+      const decayRate = hardMode.noDecay ? 0 : FEAR_DECAY;
+      fear = Math.max(0, fear - decayRate * dt);
+
+      // Update toy Bonnie's position and "happy" state every frame.
+      updateBonnie(dt);
 
       // Trigger the next scare?
       if (elapsed >= nextScareAt) {
         triggerRandomScare();
-        nextScareAt = elapsed + SCARE_MIN_GAP + Math.random() * (SCARE_MAX_GAP - SCARE_MIN_GAP);
+        // Hard mode "fastScares" cuts the gap roughly in half.
+        const gapMul = hardMode.fastScares ? 0.55 : 1;
+        const minGap = SCARE_MIN_GAP * gapMul;
+        const maxGap = SCARE_MAX_GAP * gapMul;
+        nextScareAt = elapsed + minGap + Math.random() * (maxGap - minGap);
       }
 
       // Update HUD
@@ -778,26 +1237,202 @@
           pupilL.classList.remove('scared');
           pupilR.classList.remove('scared');
         }, 420);
+      },
+
+      // ═══════════════════ HALLUCINATIONS ═══════════════════
+      // These mess with the player's perception. They make you doubt what you see.
+
+      function ghostFreddyScare() {
+        // 5 mini ghost-Freddys pop up at random screen spots in quick succession
+        for (let n = 0; n < 5; n++) {
+          setTimeout(() => {
+            const ghost = document.createElement('div');
+            ghost.className = 'ghost-freddy';
+            ghost.style.left = (Math.random() * 80 + 5) + '%';
+            ghost.style.top  = (Math.random() * 60 + 15) + '%';
+            ghost.innerHTML = '<div class="gf-head"></div><div class="gf-eyes"><div></div><div></div></div>';
+            gameScreen.appendChild(ghost);
+            setTimeout(() => ghost.remove(), 500);
+          }, n * 90);
+        }
+        playRising();
+      },
+
+      function eyesInDarkScare() {
+        // Pairs of red eyes blink open at random spots in the room
+        for (let n = 0; n < 4; n++) {
+          setTimeout(() => {
+            const pair = document.createElement('div');
+            pair.className = 'eye-pair';
+            pair.style.left = (Math.random() * 80 + 5) + '%';
+            pair.style.top  = (Math.random() * 70 + 10) + '%';
+            pair.innerHTML = '<div></div><div></div>';
+            gameScreen.appendChild(pair);
+            setTimeout(() => pair.remove(), 600);
+          }, n * 110);
+        }
+        playSting();
+      },
+
+      function bloodSplatScare() {
+        // Red splatter blooms across the screen
+        const blood = document.createElement('div');
+        blood.className = 'blood-splat';
+        gameScreen.appendChild(blood);
+        playBoom();
+        playSting();
+        setTimeout(() => blood.remove(), 700);
+      },
+
+      function warningTextScare() {
+        // Big red warning text flashes — designed to make you flinch
+        const messages = [
+          "BEHIND YOU", "RUN", "HE'S HERE", "DON'T MOVE",
+          "YOU CAN'T HIDE", "TOO LATE", "LOOK AWAY", "HE KNOWS"
+        ];
+        const text = messages[Math.floor(Math.random() * messages.length)];
+        const warn = document.createElement('div');
+        warn.className = 'warning-text';
+        warn.textContent = text;
+        gameScreen.appendChild(warn);
+        playBoom();
+        playRising();
+        setTimeout(() => warn.remove(), 800);
+      },
+
+      function heartbeatScare() {
+        // Whole screen pulses red, with 4 heart-thump sounds
+        const pulse = document.createElement('div');
+        pulse.className = 'heartbeat-pulse';
+        gameScreen.appendChild(pulse);
+        playTone(50, 0.13, 'sine', 0.32);
+        setTimeout(() => playTone(50, 0.13, 'sine', 0.32), 280);
+        setTimeout(() => playTone(50, 0.13, 'sine', 0.32), 560);
+        setTimeout(() => playTone(50, 0.13, 'sine', 0.32), 840);
+        setTimeout(() => pulse.remove(), 1200);
+      },
+
+      function altAnimatronicScare() {
+        // A different animatronic (Foxy/Bonnie/Chica) head flashes briefly
+        // — your brain says "wait, that's not Freddy" — perfect hallucination
+        const types = ['alt-foxy', 'alt-bonnie', 'alt-chica'];
+        const type = types[Math.floor(Math.random() * types.length)];
+        const head = document.createElement('div');
+        head.className = 'alt-head ' + type;
+        head.innerHTML = '<div class="alt-eye l"></div><div class="alt-eye r"></div>';
+        gameScreen.appendChild(head);
+        playRising();
+        playSting();
+        setTimeout(() => head.remove(), 460);
+      },
+
+      function hudGlitchScare() {
+        // The HUD itself glitches out — timer says "ERROR", fear meter says "???"
+        // Resets after 0.4s. Scarier than it sounds — the UI lying to you is unsettling.
+        const timerEl  = document.getElementById('timer');
+        const fearBox  = document.getElementById('fearBox');
+        const fearPct  = document.getElementById('fearPct');
+        const oldTimer = timerEl.textContent;
+        const oldFear  = fearPct.textContent;
+        timerEl.classList.add('glitch');
+        fearBox.classList.add('glitch');
+        timerEl.textContent = 'Time: ERROR';
+        fearPct.textContent = '???';
+        playSting();
+        setTimeout(() => {
+          timerEl.classList.remove('glitch');
+          fearBox.classList.remove('glitch');
+          // Real values restore on the next frame in the loop, but set them now too
+          timerEl.textContent = oldTimer;
+          fearPct.textContent = oldFear;
+        }, 450);
+      },
+
+      function teleportScare() {
+        // Freddy seems to vanish and reappear in a different spot — but not really
+        freddyWrap.classList.add('teleport');
+        playRising();
+        playSting();
+        setTimeout(() => freddyWrap.classList.remove('teleport'), 500);
+      },
+
+      function invertScare() {
+        // The whole screen inverts colors for a quarter second
+        document.body.classList.add('invert-flash');
+        playBoom();
+        setTimeout(() => document.body.classList.remove('invert-flash'), 250);
+      },
+
+      function megaComboScare() {
+        // The meanest — multiple hallucinations stacked at once
+        flashRed.classList.add('show');
+        staticBurst.classList.add('show');
+        document.body.classList.add('shake');
+        pupilL.classList.add('scared');
+        pupilR.classList.add('scared');
+        freddyWrap.classList.add('zoom');
+        // Plus a warning text
+        const warn = document.createElement('div');
+        warn.className = 'warning-text';
+        warn.textContent = 'HE\'S HERE';
+        gameScreen.appendChild(warn);
+        // Plus eye pairs in 3 corners
+        for (let n = 0; n < 3; n++) {
+          setTimeout(() => {
+            const pair = document.createElement('div');
+            pair.className = 'eye-pair';
+            pair.style.left = (Math.random() * 80 + 5) + '%';
+            pair.style.top  = (Math.random() * 70 + 10) + '%';
+            pair.innerHTML = '<div></div><div></div>';
+            gameScreen.appendChild(pair);
+            setTimeout(() => pair.remove(), 600);
+          }, n * 100);
+        }
+        // Layered audio chaos
+        playBoom();
+        playSting();
+        playRising();
+        setTimeout(() => playSting(), 200);
+        setTimeout(() => {
+          flashRed.classList.remove('show');
+          staticBurst.classList.remove('show');
+          document.body.classList.remove('shake');
+          pupilL.classList.remove('scared');
+          pupilR.classList.remove('scared');
+          freddyWrap.classList.remove('zoom');
+          warn.remove();
+        }, 600);
       }
     ];
     function triggerRandomScare() {
-      const fn = scares[Math.floor(Math.random() * scares.length)];
-      fn();
+      // Chaos mode: every scare is the meanest — combo and mega-combo only.
+      // The names are stored on the function via `.name`, so we filter by them.
+      if (hardMode.chaos) {
+        const meanScares = scares.filter(s =>
+          s.name === 'comboScare' || s.name === 'megaComboScare'
+        );
+        meanScares[Math.floor(Math.random() * meanScares.length)]();
+      } else {
+        scares[Math.floor(Math.random() * scares.length)]();
+      }
     }
 
     // ─────────────── END STATES ───────────────
     function die() {
+      // Show Freddy's giant face overlay first (the night4-specific scare),
+      // then layer the shared scary jumpscare on top, then redirect.
       jumpOverlay.style.display = 'block';
-      playJumpscareSound();
-      // Wait long enough for the scare to land, then go to the death page.
       setTimeout(() => {
-        window.location.href = 'IDK.html';
-      }, 900);
+        window.runJumpscare(() => {
+          window.location.href = 'IDK.html';
+        });
+      }, 600);
     }
     function win() {
       gameScreen.style.display = 'none';
       winScreen.style.display = 'flex';
     }
   </script>
+<script src="jumpscare.js"></script>
 </body>
 </html>

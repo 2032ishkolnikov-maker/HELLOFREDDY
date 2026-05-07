@@ -31,33 +31,36 @@ _Этот раздел заполняется вместе с автором. К
 
 **Quiz pages (story / lore checks before the climax):** `page2.html` (Pirate Cove → Foxy), `page3.html` (kitchen → Chica), `page4.html` (power), `page5.html` (backstage → Bonnie), `page6.html` (stage → Freddy, timed), `page7.html` (closing the door → Bonnie, timed).
 
-**Night 1 minigame:** `game.html` (Springtrap chase). Comes AFTER all the quiz pages, after `win.html` and `credits.html`.
+**Night 1 (intro):** `night1.html` — start screen ("12:00 AM, BEGIN SHIFT") that leads into the quiz pages.
 
-**Night 3 — Foxy / Flashlight Hallway** (built — `night3.html`, comes AFTER `game.html`)
-- **Threat:** Foxy. He's coming down the hallway.
+**Night 2 minigame:** `game.html` (Springtrap chase). HUD shows "NIGHT 2". Comes AFTER all the quiz pages, after `win.html` and `credits.html`.
+
+**Night 3 — Foxy / Hallway State Machine** (built — `night3.html`, comes AFTER `game.html`)
+- **Threat:** Foxy. He approaches down the hallway in waves.
 - **Player tool:** A flashlight.
 - **Goal:** Survive 1.5 minutes (90 seconds).
-- **Cues:** When Foxy makes a noise, the player gets BOTH a sound (audio) AND a visual hint (e.g. screen shake / icon).
-- **Correct play:** Flash the light at the moment a noise happens.
-- **Mistakes (both lose battery / advance Foxy):**
-  - Flashing when there was no noise.
-  - NOT flashing when there was a noise.
-- **Battery rules:**
+- **State machine:** the night is always in one of these states:
+  - `IDLE` — calm hallway, no danger. Flashlight is wasted here.
+  - `NOISE` — footsteps audio + red "!". Player has 1.5 sec to flash (`REACTION_WINDOW`). If they don't, Foxy reaches them in the dark → death.
+  - `VISIBLE` — Foxy is shown in the hallway (CSS art: head, ears, eyepatch, snout, glowing yellow eye, sharp teeth, low growl audio). Player must KEEP flashlight on for `VISIBLE_DURATION` (2 sec). If they let go even briefly → Foxy lunges → death.
+  - After `VISIBLE` completes safely → back to `IDLE`. Next noise is scheduled `COOLDOWN + 7–11 sec` later.
+- **Battery:**
   - Starts at 100%.
-  - Holding the flashlight ON drains 1% every 0.5 sec (2% per second).
-  - Missing a noise (Foxy advances) costs −5% battery.
-  - Flashing when there's no noise: no extra penalty — wasted battery is the natural punishment.
-- **Reaction window:** 1.5 seconds after a noise starts to flash and stay safe.
-- **Noise frequency:** Random, every 5–7 seconds.
-- **Lose condition:** Battery hits 0 → jumpscare.
-- **Win condition:** Survive 90 seconds.
-- **Tuning note:** Designed to be beatable — a careful player ends with ~70% battery left. Spamming the flashlight drains it before the night ends.
+  - Drains at `DRAIN_PER_SEC` = 3.5%/sec while flashlight ON. Battery 0 → death.
+  - All drain math: ~10 events × ~2.4 sec light-on each = ~84% drained by end of night. Tight but beatable.
+- **Noise frequency:** Random, every 7–11 seconds (`NOISE_MIN_GAP`–`NOISE_MAX_GAP`).
+- **Death paths:** all three (foxy reach, foxy lunge, battery dead) → `IDK.html`.
+- **Visuals:** Foxy is pure CSS — no image files. Hallway is CSS perspective trick. Flashlight beam is a radial gradient overlay.
+- **Audio:** Footsteps, growl, jumpscare scream — all generated via Web Audio API.
 
 **Night 4 — Freddy / Stay Still** (built — `night4.html`)
 - **Threat:** Freddy. He's in the room, watching you.
 - **Player tool:** Stillness. Don't move the mouse. Don't press keys.
 - **Goal:** Survive 1.5 minutes (90 seconds) without flinching.
-- **Cues:** Random scares (red flash, white flash, eye burst, zoom, lunge, tilt, screen shake, static, whispers, combo) every 6–12 seconds, designed to startle the player into moving.
+- **Cues:** Random scares every 6–12 seconds — designed to startle the player into moving. There are now ~20 different scare types in three flavors:
+  - **Basic:** red flash, white flash, eye burst, screen shake, static burst, whisper text, tilt
+  - **Freddy-direct:** zoom, lunge, teleport (flicker side-to-side)
+  - **Hallucinations:** ghost-Freddy mini figures popping at random spots, pairs of red eyes opening in the dark, blood splatter overlay, full-screen warning text ("BEHIND YOU", "RUN", "HE'S HERE"), heartbeat-pulse with 4 thumps, alternate-animatronic head flash (Foxy/Bonnie/Chica), HUD glitch (timer says ERROR, fear says ???), color invert flash, and a mega-combo that stacks multiple effects at once.
 - **Mechanics:**
   - Mouse movement adds fear: 0.08 fear per pixel moved, capped at 8 per frame.
   - Pressing any key (except modifiers) adds 6 fear instantly.
@@ -65,6 +68,14 @@ _Этот раздел заполняется вместе с автором. К
 - **Lose condition:** Fear reaches 100 → giant Freddy face jumpscare → redirect to `IDK.html`.
 - **Win condition:** Survive 90 seconds.
 - **Visual:** Freddy is rendered in pure CSS (no images): head, ears, hat, snout, bowtie, body, glowing yellow eyes that follow the cursor. Breathing animation. Subtle moving fog + faint TV scanlines for atmosphere.
+- **Toy Bonnie companion:** A small purple Bonnie (CSS art) floats around the screen on a smooth easing path. He glows green when the cursor is near him. He also pops a speech bubble every ~7 seconds suggesting the player press a key (Q / F / N / C). Pressing the prompted key:
+  - Costs `FEAR_PER_KEY` fear (the existing key penalty still applies).
+  - Activates a permanent hard-mode flag for the rest of the night:
+    - **Q → fastScares**: scare gap × 0.55 (almost twice as frequent).
+    - **F → doubleFear**: mouse-movement fear is doubled.
+    - **N → noDecay**: fear stops decaying — every flinch is permanent.
+    - **C → chaos**: every scare is now `comboScare` or `megaComboScare`.
+  - Active hard-mode effects are listed in a bottom-left HUD box.
 - **Audio:** All scare sounds (boom, sting, rising tone, jumpscare) generated via Web Audio API — no sound files.
 
 **Night 5:** _(to design)_
@@ -95,7 +106,10 @@ index.html  ──form action──▶  page1.html
                               story.html
                                  │
                                  ▼ (auto-redirect)
-                             jumpscare.html
+                             jumpscare.html  (now a fake "system loading" screen)
+                                 │
+                                 ▼ (after loader hits 100%)
+                             night1.html  (start screen — "Night 1, 12:00 AM, BEGIN SHIFT")
                                  │
                                  ▼
        page2.html ─▶ page3.html ─▶ page4.html ─▶ page5.html ─▶ page6.html ─▶ page7.html
@@ -131,7 +145,10 @@ index.html  ──form action──▶  page1.html
 
 ## Conventions to preserve when editing
 
-- **Single-file pages, with one exception: `music.js`.** Every page is otherwise self-contained. The shared `music.js` file plays ambient creepy music on every page (generated with the Web Audio API, no audio file needed). It's the only shared script — don't extract more without asking.
+- **Single-file pages, with two shared exceptions: `music.js` and `jumpscare.js`.** Every page is otherwise self-contained.
+  - `music.js` — plays ambient creepy music on every page (Web Audio API drone, no audio file needed).
+  - `jumpscare.js` — exposes `window.runJumpscare(callback)`. Plays a 1.1-sec full-screen face + scream + flashes + screen shake, then fades and runs the callback. Used before every death screen across the game (quiz pages, game.html, night3, night4) so all deaths feel scary even without image files.
+  - Don't extract more shared scripts without asking.
 - **Google Fonts via CDN.** Pages use `Creepster` and `Share Tech Mono` from `fonts.googleapis.com`. No local font files.
 - **Auto-redirects via `setTimeout` + `window.location.href`.** When adding a new page to the chain, follow the same pattern; don't introduce a router.
 - **Inline event handlers and inline styles** are normal here. Don't refactor to external scripts/stylesheets without a reason.
