@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Credits</title>
+  <title>Credits — Five Nights</title>
+  <link href="https://fonts.googleapis.com/css2?family=Creepster&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 
   <style>
     html, body {
@@ -10,220 +11,545 @@
       background: black;
       height: 100%;
       overflow: hidden;
-      font-family: monospace;
-      color: white;
+      font-family: 'Share Tech Mono', monospace;
+      color: #ccc;
     }
 
-    #credits {
-      position: absolute;
-      width: 100%;
-      bottom: -100%;
-      text-align: center;
-      animation: scrollUp 25s linear forwards;
+    /* Faint CRT scanlines — gives the screen that creepy old-TV feel */
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background: repeating-linear-gradient(
+        0deg,
+        rgba(255,255,255,0.04) 0,
+        rgba(255,255,255,0.04) 1px,
+        transparent 1px,
+        transparent 3px
+      );
+      z-index: 5;
     }
 
-    @keyframes scrollUp {
-      from { bottom: -100%; }
-      to { bottom: 100%; }
-    }
-
-    h1 {
-      font-size: 40px;
-      margin-bottom: 40px;
-      color: #00ffcc;
-      text-shadow: 0 0 10px #00ffcc;
-    }
-
-    p {
-      margin: 20px 0;
-      font-size: 20px;
-      opacity: 0.8;
-    }
-
+    /* Whole page flickers a tiny bit, like a broken light */
     body {
       animation: flicker 4s infinite;
     }
 
     @keyframes flicker {
       0%,100% { opacity: 1; }
-      95% { opacity: 0.85; }
-      97% { opacity: 0.6; }
-      99% { opacity: 1; }
+      94% { opacity: 0.92; }
+      96% { opacity: 0.55; }
+      98% { opacity: 0.95; }
     }
 
-    /* FINAL MESSAGE */
-    #finalMessage {
+    /* Faint phantom Freddy face that drifts in and out behind the credits.
+       Pure CSS — radial gradients form the head + glowing yellow eyes. */
+    #phantom {
       position: fixed;
       top: 50%;
       left: 50%;
+      width: 60vmin;
+      height: 60vmin;
       transform: translate(-50%, -50%);
-      color: #00ffcc;
-      font-size: 50px;
-      text-shadow: 0 0 20px #00ffcc;
+      pointer-events: none;
+      z-index: 1;
       opacity: 0;
-      z-index: 20;
-      letter-spacing: 4px;
+      animation: phantomBreath 13s ease-in-out infinite;
+      background:
+        /* left eye glow */
+        radial-gradient(circle at 35% 42%, rgba(255,210,0,0.4) 0%, transparent 18%),
+        /* right eye glow */
+        radial-gradient(circle at 65% 42%, rgba(255,210,0,0.4) 0%, transparent 18%),
+        /* head shape */
+        radial-gradient(circle at 50% 55%, rgba(80,40,20,0.55) 0%, rgba(40,15,5,0.4) 30%, transparent 65%);
+      filter: blur(1px);
     }
 
-    .showMessage {
-      animation: glitchFade 2.5s forwards;
+    @keyframes phantomBreath {
+      0%, 100% { opacity: 0; transform: translate(-50%, -50%) scale(0.9); }
+      30%      { opacity: 0; }
+      50%      { opacity: 0.55; transform: translate(-50%, -50%) scale(1); }
+      70%      { opacity: 0; }
     }
 
-    @keyframes glitchFade {
-      0% {
-        opacity: 0;
-        transform: translate(-50%, -70%) scale(0.9);
-      }
-
-      10% {
-        opacity: 1;
-        transform: translate(-52%, -48%);
-      }
-
-      20% { transform: translate(-48%, -52%); }
-
-      30% {
-        text-shadow: 2px 0 red, -2px 0 cyan, 0 0 15px #00ffcc;
-      }
-
-      50% {
-        text-shadow: -2px 0 red, 2px 0 cyan, 0 0 20px #00ffcc;
-      }
-
-      70% {
-        text-shadow: 1px 0 red, -1px 0 cyan, 0 0 25px #00ffcc;
-      }
-
-      100% {
-        opacity: 1;
-        transform: translate(-50%, -50%);
-        text-shadow: 0 0 20px #00ffcc;
-      }
-    }
-
-    /* BUTTONS */
-    #buttons {
-      position: fixed;
-      bottom: 30px;
+    /* The scrolling credits roll.
+       Trick: place it at top:0, then animate transform from 100vh down to -100% up
+       so the whole element scrolls past the screen from bottom to top. */
+    #credits {
+      position: absolute;
+      top: 0;
+      left: 0;
       width: 100%;
-      display: none;
-      justify-content: center;
-      gap: 20px;
-      z-index: 10;
+      text-align: center;
+      transform: translateY(100vh);
+      animation: scrollUp 55s linear forwards;
+      z-index: 3;
     }
 
-    #buttons button {
-      padding: 12px 25px;
+    @keyframes scrollUp {
+      0%   { transform: translateY(100vh); }
+      100% { transform: translateY(-100%); }
+    }
+
+    /* The big bloody title at the top of the roll */
+    .title {
+      font-family: 'Creepster', cursive;
+      color: #ff2a2a;
+      font-size: 84px;
+      letter-spacing: 6px;
+      text-shadow:
+        0 0 10px #ff2a2a,
+        0 0 30px #ff2a2a,
+        0 0 60px rgba(255,42,42,0.4);
+      margin: 40px 0 6px 0;
+    }
+
+    .subtitle {
+      font-style: italic;
+      color: #aaa;
+      font-size: 18px;
+      letter-spacing: 4px;
+      margin-bottom: 90px;
+    }
+
+    /* Role label (small, cyan, all caps) */
+    .role {
+      color: #00ffcc;
+      font-size: 13px;
+      letter-spacing: 5px;
+      text-transform: uppercase;
+      margin-top: 55px;
+      margin-bottom: 8px;
+      text-shadow: 0 0 6px #00ffcc;
+    }
+
+    /* Person / studio name */
+    .name {
+      color: #fff;
+      font-size: 22px;
+      letter-spacing: 2px;
+      margin: 4px 0;
+    }
+
+    /* "Cast" rows — actor name on left, role on right */
+    .castLine {
+      color: #fff;
+      font-size: 18px;
+      margin: 8px 0;
+      letter-spacing: 1px;
+    }
+
+    .castLine .actor {
+      color: #ffaa00;
+      text-shadow: 0 0 6px rgba(255,170,0,0.6);
+    }
+
+    /* Decorative section divider */
+    .divider {
+      color: #444;
+      letter-spacing: 8px;
+      margin: 70px 0;
+      font-size: 20px;
+    }
+
+    .small {
+      color: #777;
+      font-size: 14px;
+      margin: 4px 0;
+    }
+
+    /* Final big creepy line */
+    .quote {
+      color: #ff2a2a;
+      font-family: 'Creepster', cursive;
+      font-size: 42px;
+      letter-spacing: 4px;
+      margin: 90px 0 60px 0;
+      text-shadow: 0 0 12px #ff2a2a, 0 0 40px #ff2a2a;
+    }
+
+    .thanks {
+      color: #00ffcc;
+      font-size: 30px;
+      margin: 80px 0 60px 0;
+      text-shadow: 0 0 14px #00ffcc;
+      letter-spacing: 3px;
+    }
+
+    /* ─── AMBIENT HORROR LAYERS ─── */
+
+    /* Pair of glowing red eyes that pop open at random spots in the dark */
+    .eyes {
+      position: fixed;
+      z-index: 8;
+      width: 60px;
+      height: 16px;
+      pointer-events: none;
+      display: flex;
+      justify-content: space-between;
+      animation: eyesAppear 2.4s ease-out forwards;
+    }
+
+    .eyes::before, .eyes::after {
+      content: "";
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #ff5050 0%, #aa0000 50%, transparent 80%);
+      box-shadow: 0 0 14px #ff2222, 0 0 30px rgba(255,30,30,0.6);
+    }
+
+    @keyframes eyesAppear {
+      0%   { opacity: 0; transform: scale(0.5); }
+      20%  { opacity: 1; transform: scale(1); }
+      75%  { opacity: 1; }
+      100% { opacity: 0; transform: scale(0.95); }
+    }
+
+    /* Whisper text — creepy words that flash briefly on screen */
+    .whisper {
+      position: fixed;
+      z-index: 8;
+      font-family: 'Creepster', cursive;
+      color: #ff2a2a;
+      font-size: 38px;
+      letter-spacing: 4px;
+      text-shadow: 0 0 12px #ff2a2a, 0 0 30px #ff2a2a;
+      pointer-events: none;
+      opacity: 0;
+      animation: whisperFlash 1.4s ease-out forwards;
+    }
+
+    @keyframes whisperFlash {
+      0%   { opacity: 0; transform: scale(0.9); }
+      15%  { opacity: 0.95; transform: scale(1); }
+      60%  { opacity: 0.7; }
+      100% { opacity: 0; transform: scale(1.05); }
+    }
+
+    /* Full-screen TV static burst — quick flash of analog noise */
+    .staticBurst {
+      position: fixed;
+      inset: 0;
+      z-index: 9;
+      pointer-events: none;
+      background:
+        repeating-linear-gradient(0deg,  rgba(255,255,255,0.5) 0 1px, transparent 1px 3px),
+        repeating-linear-gradient(90deg, rgba(0,0,0,0.5) 0 2px, transparent 2px 5px);
+      mix-blend-mode: difference;
+      animation: staticGo 0.18s steps(3) forwards;
+    }
+
+    @keyframes staticGo {
+      0%   { opacity: 0.7; transform: translate(0, 0); }
+      33%  { opacity: 0.5; transform: translate(2px, -1px); }
+      66%  { opacity: 0.6; transform: translate(-2px, 1px); }
+      100% { opacity: 0; }
+    }
+
+    /* ─── END SCREEN (after the jumpscare) ─── */
+    #endScreen {
+      position: fixed;
+      inset: 0;
+      display: none;        /* hidden until JS shows it */
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      background: radial-gradient(circle at center, #110000 0%, #000 80%);
+      z-index: 20;
+      animation: endFade 2s forwards;
+    }
+
+    @keyframes endFade {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+
+    #endTitle {
+      font-family: 'Creepster', cursive;
+      color: #ff2a2a;
+      font-size: 100px;
+      letter-spacing: 8px;
+      text-shadow: 0 0 20px #ff2a2a, 0 0 60px #ff2a2a;
+      animation: pulseTitle 2.5s ease-in-out infinite;
+      margin-bottom: 60px;
+    }
+
+    @keyframes pulseTitle {
+      0%,100% { text-shadow: 0 0 20px #ff2a2a, 0 0 60px #ff2a2a; }
+      50%     { text-shadow: 0 0 35px #ff2a2a, 0 0 90px #ff2a2a, 0 0 130px rgba(255,42,42,0.5); }
+    }
+
+    #restartBtn {
+      padding: 18px 55px;
       background: black;
       color: #00ffcc;
-      border: 1px solid #00ffcc;
-      font-family: monospace;
-      font-size: 16px;
+      border: 2px solid #00ffcc;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 22px;
+      letter-spacing: 8px;
       cursor: pointer;
-      text-shadow: 0 0 5px #00ffcc;
-      box-shadow: 0 0 10px #00ffcc inset;
-      transition: 0.2s;
+      text-shadow: 0 0 8px #00ffcc;
+      box-shadow: 0 0 25px #00ffcc inset, 0 0 25px rgba(0,255,204,0.4);
+      transition: transform 0.2s, background 0.2s, box-shadow 0.2s;
     }
 
-    #buttons button:hover {
+    #restartBtn:hover {
       background: #00ffcc;
       color: black;
-      box-shadow: 0 0 20px #00ffcc;
+      box-shadow: 0 0 50px #00ffcc;
+      transform: scale(1.05);
+    }
+
+    /* Tiny "skip" hint while the credits scroll */
+    #skipHint {
+      position: fixed;
+      bottom: 20px;
+      right: 24px;
+      color: #555;
+      font-size: 13px;
+      letter-spacing: 2px;
+      z-index: 10;
+      animation: hintFade 4s ease-in-out infinite;
+    }
+
+    @keyframes hintFade {
+      0%,100% { opacity: 0.4; }
+      50%     { opacity: 0.9; }
     }
   </style>
 </head>
 
 <body>
 
+<!-- Faint phantom Freddy that breathes in and out behind everything -->
+<div id="phantom"></div>
+
+<!-- ─── THE SCROLLING CREDITS ROLL ─── -->
 <div id="credits">
-  <h1>6:00 AM</h1>
 
-  <p>You survived…</p>
-  <p>But they are still here.</p>
+  <div class="title">FIVE NIGHTS</div>
+  <div class="subtitle">— A NIGHTMARE IN FIVE PARTS —</div>
 
-  <p>────────────</p>
+  <div class="role">A Game By</div>
+  <div class="name">Iakov Shkolnikov</div>
 
-  <p>Game Design</p>
-  <p>Iakov Shkolnikov</p>
+  <div class="role">Game Design</div>
+  <div class="name">Iakov Shkolnikov</div>
 
-  <p>Programming</p>
-  <p>Iakov Shkolnikov</p>
+  <div class="role">Programming</div>
+  <div class="name">Iakov Shkolnikov</div>
 
-  <p>Animatronics</p>
-  <p>Watching are 
-    You!</p>
+  <div class="role">Story &amp; Writing</div>
+  <div class="name">Iakov Shkolnikov</div>
 
-  <p>────────────</p>
+  <div class="divider">━━━ ✦ ━━━</div>
 
-  <p>Thank you for playing.</p>
+  <div class="role">Cast of Animatronics</div>
+  <div class="castLine"><span class="actor">Freddy Fazbear</span> &nbsp;…&nbsp; The Watcher</div>
+  <div class="castLine"><span class="actor">Bonnie</span> &nbsp;…&nbsp; The Companion</div>
+  <div class="castLine"><span class="actor">Chica</span> &nbsp;…&nbsp; The Cook</div>
+  <div class="castLine"><span class="actor">Foxy</span> &nbsp;…&nbsp; The Pirate</div>
+  <div class="castLine"><span class="actor">Springtrap</span> &nbsp;…&nbsp; The Hunter</div>
+
+  <div class="divider">━━━ ✦ ━━━</div>
+
+  <div class="role">Sound Design</div>
+  <div class="name">Web Audio API</div>
+  <div class="small">(every scream made from sine waves)</div>
+
+  <div class="role">Visuals</div>
+  <div class="name">HTML &amp; CSS</div>
+  <div class="small">(no images — every animatronic is pure code)</div>
+
+  <div class="role">Built With</div>
+  <div class="name">Just a text editor and bravery</div>
+
+  <div class="divider">━━━ ✦ ━━━</div>
+
+  <div class="role">Special Thanks</div>
+  <div class="name">The night guard who never made it</div>
+  <div class="name">The children who never left</div>
+  <div class="name">You — for surviving until 6 AM</div>
+
+  <div class="divider">━━━ ✦ ━━━</div>
+
+  <div class="quote">"BUT HE NEVER LEFT…"</div>
+
+  <div class="thanks">THANK YOU FOR PLAYING</div>
+
+  <div class="small" style="margin-bottom:120px;">© 2026 — Iakov Shkolnikov</div>
+
 </div>
 
-<div id="finalMessage"></div>
+<!-- Tiny corner hint -->
+<div id="skipHint">PRESS [SPACE] TO SKIP</div>
 
-<div id="buttons">
-  <button onclick="restart()">Restart</button>
-  <button onclick="continueGame()">Continue</button>
+<!-- ─── END-OF-CREDITS RESTART SCREEN ─── -->
+<div id="endScreen">
+  <div id="endTitle">THE END</div>
+  <button id="restartBtn" onclick="restart()">RESTART</button>
 </div>
 
-<audio id="creepy" src="creepy.mp3" loop></audio>
+<!-- jumpscare.js gives us window.runJumpscare(callback) — same scare used on Night 3/4 deaths -->
+<script src="jumpscare.js"></script>
 
 <script>
-  window.onload = () => {
-    const audio = document.getElementById("creepy");
-    audio.volume = 0.4;
-    audio.play().catch(() => {});
+  const credits   = document.getElementById('credits');
+  const endScreen = document.getElementById('endScreen');
+  const skipHint  = document.getElementById('skipHint');
 
-    setTimeout(showFinalMessage, 25000);
-  };
+  let endTriggered = false;
 
-  function showFinalMessage() {
-    const msg = document.getElementById("finalMessage");
-    const finalText = "IT'S TIME";
+  // ─────────── AMBIENT HORROR LAYER ───────────
+  // Random creepy effects keep firing while the credits scroll.
+  // Each effect schedules its NEXT firing when it runs — that way
+  // each one has its own random rhythm and they don't sync up.
 
-    const glitchChars = "!@#$%^&*()_+=-[]{};:<>?/\\|ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  let eyesTimer, whisperTimer, staticTimer, heartTimer;
 
-    let iterations = 0;
-
-    msg.classList.add("showMessage");
-
-    const interval = setInterval(() => {
-      msg.textContent = finalText
-        .split("")
-        .map((char, index) => {
-
-          if (index < iterations) {
-            // missing letter flicker
-            if (Math.random() < 0.2) return "";
-            return finalText[index];
-          }
-
-          return glitchChars[Math.floor(Math.random() * glitchChars.length)];
-        })
-        .join("");
-
-      if (iterations >= finalText.length) {
-        clearInterval(interval);
-
-        setTimeout(() => {
-          msg.textContent = finalText;
-        }, 200);
-      }
-
-      iterations += 0.5;
-    }, 50);
-
-    setTimeout(() => {
-      document.getElementById("buttons").style.display = "flex";
-    }, 3500);
+  function startAmbient() {
+    scheduleEyes();
+    scheduleWhisper();
+    scheduleStatic();
+    scheduleHeartbeat();
   }
+
+  function stopAmbient() {
+    clearTimeout(eyesTimer);
+    clearTimeout(whisperTimer);
+    clearTimeout(staticTimer);
+    clearTimeout(heartTimer);
+  }
+
+  // Glowing red eyes pop open in random dark spots, then fade out.
+  function scheduleEyes() {
+    eyesTimer = setTimeout(() => {
+      spawnEyes();
+      scheduleEyes();
+    }, 2500 + Math.random() * 4000);
+  }
+
+  function spawnEyes() {
+    const e = document.createElement('div');
+    e.className = 'eyes';
+    e.style.left = (5 + Math.random() * 85) + '%';
+    e.style.top  = (10 + Math.random() * 75) + '%';
+    document.body.appendChild(e);
+    setTimeout(() => e.remove(), 2400);
+  }
+
+  // Creepy whisper-words flash briefly on screen.
+  const WHISPERS = [
+    "HE'S HERE", "BEHIND YOU", "RUN", "LOOK AWAY", "DON'T BLINK",
+    "HELP ME", "GET OUT", "TURN AROUND", "I SEE YOU", "SO COLD",
+    "IT'S ME", "WAKE UP"
+  ];
+
+  function scheduleWhisper() {
+    whisperTimer = setTimeout(() => {
+      flashWhisper();
+      scheduleWhisper();
+    }, 5000 + Math.random() * 6000);
+  }
+
+  function flashWhisper() {
+    const el = document.createElement('div');
+    el.className = 'whisper';
+    el.textContent = WHISPERS[Math.floor(Math.random() * WHISPERS.length)];
+    el.style.left = (10 + Math.random() * 65) + '%';
+    el.style.top  = (15 + Math.random() * 65) + '%';
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 1400);
+  }
+
+  // Quick burst of TV static — like the signal is tearing.
+  function scheduleStatic() {
+    staticTimer = setTimeout(() => {
+      burstStatic();
+      scheduleStatic();
+    }, 7000 + Math.random() * 9000);
+  }
+
+  function burstStatic() {
+    const el = document.createElement('div');
+    el.className = 'staticBurst';
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 220);
+  }
+
+  // Heartbeat thump-thump that gets faster as the credits go on.
+  // We make a sine wave at ~55 Hz, two short pulses with a small gap.
+  let audioCtx;
+  let heartIntensity = 0;   // 0 → 1, slowly rises so heart speeds up
+
+  function scheduleHeartbeat() {
+    // Gap shrinks from ~4s down to ~1.8s as intensity climbs
+    const gap = 4000 - heartIntensity * 2200 + Math.random() * 1200;
+    heartTimer = setTimeout(() => {
+      playHeartbeat();
+      heartIntensity = Math.min(1, heartIntensity + 0.045);
+      scheduleHeartbeat();
+    }, gap);
+  }
+
+  function playHeartbeat() {
+    try {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const c = audioCtx;
+      const t = c.currentTime;
+      // Two thumps, ~180ms apart — that "lub-DUB" feel
+      for (let i = 0; i < 2; i++) {
+        const osc = c.createOscillator();
+        const g   = c.createGain();
+        osc.type = 'sine';
+        osc.frequency.value = 55;
+        g.gain.setValueAtTime(0, t + i * 0.18);
+        g.gain.linearRampToValueAtTime(0.35, t + i * 0.18 + 0.02);
+        g.gain.exponentialRampToValueAtTime(0.001, t + i * 0.18 + 0.22);
+        osc.connect(g).connect(c.destination);
+        osc.start(t + i * 0.18);
+        osc.stop(t + i * 0.18 + 0.25);
+      }
+    } catch (e) { /* audio not allowed — silently ignore */ }
+  }
+
+  // ─────────── END SEQUENCE ───────────
+  // Credits finished (or player pressed Space):
+  //   1. stop all ambient effects + freeze the scroll
+  //   2. play the big shared jumpscare (face + scream + shake)
+  //   3. fade in THE END + Restart button
+
+  function triggerEnd() {
+    if (endTriggered) return;
+    endTriggered = true;
+
+    stopAmbient();
+    skipHint.style.display = 'none';
+
+    // freeze the credit roll where it is so the jumpscare hits harder
+    credits.style.animationPlayState = 'paused';
+
+    window.runJumpscare(() => {
+      endScreen.style.display = 'flex';
+    });
+  }
+
+  credits.addEventListener('animationend', triggerEnd);
+
+  document.addEventListener('keydown', (e) => {
+    if (e.code === 'Space' && !endTriggered) {
+      e.preventDefault();
+      triggerEnd();
+    }
+  });
 
   function restart() {
-    window.location.href = "index.html";
+    window.location.href = 'index.html';
   }
 
-  function continueGame() {
-    window.location.href = "game.html";
-  }
+  startAmbient();
 </script>
 
 <script src="music.js"></script>

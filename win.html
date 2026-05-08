@@ -88,7 +88,7 @@
   <div id="time">6:00 AM</div>
   <div id="text">You survived the night.</div>
 
-  <button id="continueBtn" onclick="goToCredits()">Continue</button>
+  <button id="continueBtn" onclick="goToNextNight()">Continue</button>
 </div>
 
 <audio id="winSound" src="win.mp3"></audio>
@@ -101,16 +101,16 @@ window.onload = () => {
   sound.play().catch(()=>{});
 };
 
-// 🔄 continue → credits
-function goToCredits() {
+// 🔄 continue → next night (Night 2)
+function goToNextNight() {
   const btn = document.getElementById("continueBtn");
 
   // flip animation
   btn.classList.add("flip");
 
-  // go to credits after animation
+  // go to Night 2 after animation
   setTimeout(() => {
-    window.location.href = "credits.html";
+    window.location.href = "game.html";
   }, 600);
 }
 </script>

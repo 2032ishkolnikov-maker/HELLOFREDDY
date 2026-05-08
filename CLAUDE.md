@@ -78,7 +78,20 @@ _Этот раздел заполняется вместе с автором. К
   - Active hard-mode effects are listed in a bottom-left HUD box.
 - **Audio:** All scare sounds (boom, sting, rising tone, jumpscare) generated via Web Audio API — no sound files.
 
-**Night 5:** _(to design)_
+**Night 5 — The Office / FNAF1-style** (built — `night5.html`, comes AFTER `night4.html`)
+- **Threat:** all four animatronics at once — Bonnie, Chica, Foxy, Freddy.
+- **Player tools:** two doors, two hallway lights, a CAMERAS view with 4 cameras (Stage, Pirate Cove, Left Hall, Right Hall). All controls drain power.
+- **Goal:** Survive 90 seconds = 6 in-game hours (12 AM → 6 AM, 15 sec per hour).
+- **Animatronic AI:**
+  - Each non-Foxy animatronic has a `level` (0..4). Every `TICK_INTERVAL` (2 sec), they have a chance to advance one level. At level 4 they're at your door — if you don't close it within `DOOR_ATTACK_DELAY` (2.5 sec), death. Closing the door retreats them to level 2.
+  - `ADVANCE_CHANCE`: bonnie 0.32, chica 0.28, freddy 0.18. Multiplied by `1 + elapsed/TOTAL_TIME * 0.6` so it ramps up.
+  - **Foxy** is special: he stays in Pirate Cove. A `restless` timer grows when his cam isn't being viewed. If it exceeds `FOXY_RESTLESS_LIMIT` (12 sec), he charges. The player has `FOXY_ATTACK_WINDOW` (2.5 sec) to close the left door. Successful block costs −5% power. The cove camera button blinks red when restless > 70% of the limit.
+- **Power:** drains at `usage × POWER_DRAIN_PER_USAGE` (0.45) per second. Usage = 1 (base) + 1 per active item (each door, each light, camera). Max usage = 6 → drains 2.7%/sec. Power 0 → black screen → Freddy's eyes appear → Toreador melody plays → jumpscare → `IDK.html`.
+- **Camera view:** four cameras with different scene backgrounds (stage curtains, cove letterboard, hallway perspective). Each camera shows whichever animatronic's level matches that room. CCTV scanlines + noise overlay. Mini-map in bottom-right with 4 buttons.
+- **Death paths:** Bonnie/Chica/Freddy door attack, Foxy charge, power-out → all run shared scary jumpscare → `IDK.html`.
+- **Win:** survive to 6 AM → green "6:00 AM" screen → `credits.html`.
+- **All visuals are pure CSS (no images).** Animatronics in cameras = ear/head/eye/body shapes with per-character color gradients. Office hallways = clip-path trapezoids. Doors = repeating-linear-gradient panels.
+- **All audio is generated** (Web Audio API): door slams, click sounds, camera static, Foxy footsteps, Toreador melody for power-out.
 
 ## Project type
 
@@ -115,33 +128,34 @@ index.html  ──form action──▶  page1.html
        page2.html ─▶ page3.html ─▶ page4.html ─▶ page5.html ─▶ page6.html ─▶ page7.html
                                                                                   │
                                                                                   ▼
-                                                                              win.html
+                                                                              win.html  (6:00 AM — survived Night 1)
+                                                                                  │
+                                                                                  ▼ (Continue)
+                                                                             game.html  (Night 2 — Springtrap chase)
+                                                                          │           │
+                                                                          ▼           ▼
+                                                                  night3.html      IDK.html ("YOU DIED")
+                                                                          │           │
+                                                                          ▼           ▼ (30s timer)
+                                                                  night4.html     index.html
                                                                           │
                                                                           ▼
-                                                                     credits.html
-                                                                       │     │
-                                                                       ▼     ▼
-                                                                 game.html  index.html
-                                                                       │
-                                                            ┌──────────┴──────────┐
-                                                            ▼                     ▼
-                                                     (player wins)           IDK.html ("YOU DIED")
-                                                            │                     │
-                                                            ▼                     ▼ (30s timer)
-                                                     night3.html             index.html
-                                                            │
-                                                            ▼
-                                                     night4.html
-                                                            │
-                                                            ▼
-                                                 (Night 5 coming soon)
+                                                                  night5.html  (Night 5 — the FNAF1 office)
+                                                                          │
+                                                                          ▼ (after surviving)
+                                                                  credits.html  (real end credits + only "Restart" button)
+                                                                          │
+                                                                          ▼ (Restart)
+                                                                     index.html
 ```
 
-`page4.html` was added later, slotted between page3 and page5 (so the page numbering 2,3,4,5,6,7 is contiguous). All 6 quiz pages run before win/credits/game/night3.
+`page4.html` was added later, slotted between page3 and page5 (so the page numbering 2,3,4,5,6,7 is contiguous). All 6 quiz pages run before win/game/night3/night4/credits.
 
 `index.html` collects `fname`/`lname` via a GET form to `page1.html` — they appear as URL query params but **nothing reads them**. The form is decorative.
 
-`game.html` is a self-contained Canvas mini-game (`FNAF Chase – Survive the Night`) with its own start/win/death screens. It only connects to the rest of the chain via `credits.html` (entry) and `IDK.html` (on-death exit). Editing the chain pages does not affect game logic, and vice versa.
+`game.html` is a self-contained Canvas mini-game (`FNAF Chase – Survive the Night`) with its own start/win/death screens. It connects to the rest of the chain via `win.html` (entry) and `IDK.html` (on-death exit), and exits to `night3.html` on win. Editing the chain pages does not affect game logic, and vice versa.
+
+`credits.html` is the **real end of the game** — scrolling movie-style credits + a single "Restart" button that returns to `index.html`. When Night 5 is built, slot it between `night4.html` and `credits.html` (i.e. change `night4.html`'s win redirect to `night5.html`, and have `night5.html` redirect to `credits.html`).
 
 ## Conventions to preserve when editing
 
