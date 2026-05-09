@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <script>document.documentElement.classList.toggle('is-mobile', window.matchMedia('(hover: none) and (pointer: coarse)').matches);</script>
   <title>FazLogin</title>
 
   <style>
@@ -41,6 +44,17 @@
       text-align: center;
       width: 350px;
       animation: fadeIn 2s ease;
+    }
+
+    /* Mobile-only: keep the login box fitting inside narrow phone screens */
+    html.is-mobile .container {
+      width: 88%;
+      max-width: 350px;
+      padding: 28px 22px;
+    }
+    html.is-mobile input[type="submit"] {
+      padding: 16px 32px;
+      font-size: 18px;
     }
 
     @keyframes fadeIn {

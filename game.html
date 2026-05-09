@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <script>document.documentElement.classList.toggle('is-mobile', window.matchMedia('(hover: none) and (pointer: coarse)').matches);</script>
   <title>FNAF Chase – Survive the Night</title>
   <style>
     /* ── Global Reset & Font ─────────────────────────────────────── */
@@ -227,6 +228,46 @@
       0%   { opacity: 1; }
       100% { opacity: 0; }
     }
+
+    /* ─────────── MOBILE-ONLY ───────────
+       Virtual joystick + per-device hints. Desktop is left untouched. */
+
+    .mobile-only  { display: none; }
+    .desktop-only { display: inline; }
+    html.is-mobile .mobile-only  { display: inline; }
+    html.is-mobile .desktop-only { display: none; }
+
+    /* Virtual joystick — sits at bottom-left of the game area.
+       Drag inside it; the direction of the drag toggles the same WASD
+       keys that the keyboard sets, so the player physics code is unchanged. */
+    #touchJoystick {
+      display: none;
+      position: absolute;
+      bottom: 24px;
+      left: 24px;
+      width: 140px; height: 140px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(40,15,5,0.5) 0%, rgba(10,3,0,0.25) 70%);
+      border: 2px solid rgba(255,170,68,0.45);
+      box-shadow: 0 0 14px rgba(255,170,68,0.3);
+      z-index: 50;
+      touch-action: none;
+      -webkit-user-select: none; user-select: none;
+    }
+    html.is-mobile #touchJoystick { display: block; }
+    #touchJoystick .joy-knob {
+      position: absolute;
+      top: 50%; left: 50%;
+      width: 60px; height: 60px;
+      margin: -30px 0 0 -30px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #ffcc66, #884400 75%);
+      border: 2px solid #ffe899;
+      box-shadow: 0 0 16px rgba(255,200,80,0.6);
+      pointer-events: none;
+      transition: transform 0.08s ease-out;
+    }
+    #touchJoystick.active .joy-knob { transition: none; }
   </style>
 </head>
 <body>
@@ -239,7 +280,7 @@
   <p>You're trapped inside <strong>Freddy Fazbear's Pizza</strong>.<br>
      <strong>Springtrap</strong> is hunting you through the dark corridors.<br>
      Survive for <strong>60 seconds</strong> to escape.</p>
-  <p class="sub">WASD / Arrow Keys to move &nbsp;|&nbsp; Don't let him catch you.</p>
+  <p class="sub"><span class="desktop-only">WASD / Arrow Keys to move</span><span class="mobile-only">Drag the joystick to move</span> &nbsp;|&nbsp; Don't let him catch you.</p>
   <button id="startBtn" onclick="forceStart()">START NIGHT</button>
 </div>
 
@@ -254,6 +295,8 @@
   <div id="jumpscareOverlay">
     <img id="jumpscareImg" src="springtrap_jumpscare.png" alt="JUMPSCARE" />
   </div>
+  <!-- Mobile-only virtual joystick. Hidden on desktop. -->
+  <div id="touchJoystick"><div class="joy-knob"></div></div>
 </div>
 
 <!-- ═══════════════════ WIN SCREEN ═══════════════════ -->
@@ -458,6 +501,67 @@ sImg.src = 'springtrap_sprite.png';
 const keys = {};
 window.addEventListener('keydown', e => { keys[e.key] = true; });
 window.addEventListener('keyup',   e => { keys[e.key] = false; });
+
+// ─── MOBILE: virtual joystick → fakes the same WASD keys ───
+// Drag inside the joystick circle; we set keys['w'/'a'/'s'/'d'] based on
+// the direction. Player movement code stays exactly the same.
+if (document.documentElement.classList.contains('is-mobile')) {
+  const joy   = document.getElementById('touchJoystick');
+  const knob  = joy.querySelector('.joy-knob');
+  const MAX_DIST  = 50;   // how far the knob can travel from center, in px
+  const DEAD_ZONE = 12;   // tiny drags don't count — prevents jitter
+  let activeId = null;    // identifier of the touch we're tracking
+  let centerX = 0, centerY = 0;
+
+  function setKeys(dx, dy) {
+    keys['w'] = dy < -DEAD_ZONE;
+    keys['s'] = dy >  DEAD_ZONE;
+    keys['a'] = dx < -DEAD_ZONE;
+    keys['d'] = dx >  DEAD_ZONE;
+  }
+  function clearKeys() {
+    keys['w'] = keys['a'] = keys['s'] = keys['d'] = false;
+  }
+
+  joy.addEventListener('touchstart', e => {
+    e.preventDefault();
+    if (activeId !== null) return;
+    const t = e.changedTouches[0];
+    activeId = t.identifier;
+    const rect = joy.getBoundingClientRect();
+    centerX = rect.left + rect.width  / 2;
+    centerY = rect.top  + rect.height / 2;
+    joy.classList.add('active');
+  }, { passive: false });
+
+  joy.addEventListener('touchmove', e => {
+    if (activeId === null) return;
+    e.preventDefault();
+    let touch = null;
+    for (const t of e.touches) if (t.identifier === activeId) touch = t;
+    if (!touch) return;
+
+    let dx = touch.clientX - centerX;
+    let dy = touch.clientY - centerY;
+    const dist = Math.hypot(dx, dy);
+    if (dist > MAX_DIST) { dx = dx / dist * MAX_DIST; dy = dy / dist * MAX_DIST; }
+    knob.style.transform = `translate(${dx}px, ${dy}px)`;
+    setKeys(dx, dy);
+  }, { passive: false });
+
+  function endTouch(e) {
+    if (activeId === null) return;
+    let stillThere = false;
+    for (const t of e.touches) if (t.identifier === activeId) stillThere = true;
+    if (stillThere) return;
+    activeId = null;
+    knob.style.transform = '';
+    joy.classList.remove('active');
+    clearKeys();
+  }
+  joy.addEventListener('touchend',    endTouch);
+  joy.addEventListener('touchcancel', endTouch);
+}
 
 // ── Audio ─────────────────────────────────────────────────────────
 let audioCtx = null;

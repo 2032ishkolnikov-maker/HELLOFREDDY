@@ -2,6 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <script>document.documentElement.classList.toggle('is-mobile', window.matchMedia('(hover: none) and (pointer: coarse)').matches);</script>
   <title>Night 4 – Freddy</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Creepster&family=Share+Tech+Mono&display=swap');
@@ -751,6 +753,24 @@
     }
     #hardModeBox.show { display: block; }
     #hardModeBox .label { color: #ff66ff; font-weight: bold; letter-spacing: 2px; }
+
+    /* ─────────── MOBILE-ONLY ───────────
+       Hidden on desktop. Triggered when <html class="is-mobile"> is set
+       by the inline detector in <head>. PC version is left alone. */
+
+    /* Pair of helpers so we can show/hide bits of text per device */
+    .mobile-only  { display: none; }
+    .desktop-only { display: block; }
+    html.is-mobile .mobile-only  { display: block; }
+    html.is-mobile .desktop-only { display: none; }
+
+    /* On mobile, Bonnie's speech bubble becomes tappable — that's how
+       you "agree" to a hard-mode prompt instead of pressing Q/F/N/C. */
+    html.is-mobile #bonnieSpeech {
+      cursor: pointer;
+      border-color: #ffaa44;
+      box-shadow: 0 0 14px rgba(255,170,68,0.7);
+    }
   </style>
 </head>
 <body>
@@ -760,10 +780,12 @@
     <h1>NIGHT 4</h1>
     <p style="margin-top:1rem;">Freddy is in the room with you.</p>
     <p>He only moves when YOU move. Stay perfectly still.</p>
-    <p>Keep your mouse on the orange dot. Don't press any keys.</p>
+    <p class="desktop-only">Keep your mouse on the orange dot. Don't press any keys.</p>
+    <p class="mobile-only"><strong>Don't touch the screen.</strong> Don't move your finger over it. Don't tap.</p>
     <p>He will try to scare you. Don't flinch. Survive 1 minute 30 seconds.</p>
     <p style="margin-top:1.2rem;color:#888;">If you flinch too much, he gets you.</p>
-    <p style="margin-top:0.6rem;color:#cc88ff;">Watch out for the toy Bonnie. He'll try to make you press keys. Don't.</p>
+    <p class="desktop-only" style="margin-top:0.6rem;color:#cc88ff;">Watch out for the toy Bonnie. He'll try to make you press keys. Don't.</p>
+    <p class="mobile-only" style="margin-top:0.6rem;color:#cc88ff;">Watch out for the toy Bonnie. He'll show buttons. Tapping them makes the night HARDER.</p>
     <button onclick="startGame()">FACE FREDDY</button>
   </div>
 
@@ -951,6 +973,40 @@
       pupilL.style.transform = `translate(calc(-50% + ${ox}px), calc(-50% + ${oy}px))`;
       pupilR.style.transform = `translate(calc(-50% + ${ox}px), calc(-50% + ${oy}px))`;
     });
+
+    // ─── MOBILE: touch is "moving" (no mouse on a phone) ───
+    // touchmove → adds fear like mousemove. touchstart → adds fear like a key press.
+    // (PC behavior is unchanged because these listeners only do anything on mobile.)
+    const isMobileDevice = document.documentElement.classList.contains('is-mobile');
+    if (isMobileDevice) {
+      document.addEventListener('touchmove', (e) => {
+        if (!gameRunning) return;
+        const t = e.touches[0]; if (!t) return;
+        if (!mouseInitialized) {
+          lastMouseX = t.clientX; lastMouseY = t.clientY;
+          mouseInitialized = true;
+          return;
+        }
+        const dx = t.clientX - lastMouseX;
+        const dy = t.clientY - lastMouseY;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        lastMouseX = t.clientX; lastMouseY = t.clientY;
+
+        const fppMul = hardMode.doubleFear ? 2 : 1;
+        fear += Math.min(dist * FEAR_PER_PIXEL * fppMul, MAX_FEAR_PER_FRAME * fppMul);
+      }, { passive: true });
+
+      // touchstart on the Bonnie bubble = "agree" to that hard-mode prompt.
+      // We attach the per-touch fear penalty in a SEPARATE document listener
+      // so any tap (bubble or not) still costs FEAR_PER_KEY, mirroring desktop.
+      document.addEventListener('touchstart', (e) => {
+        if (!gameRunning) return;
+        fear += FEAR_PER_KEY;
+        if (currentPrompt && bonnieSpeechEl.contains(e.target)) {
+          activateHardMode(currentPrompt);
+        }
+      }, { passive: true });
+    }
 
     // ─────────────── TOY BONNIE ───────────────
     // A small purple Bonnie floats around the screen.

@@ -86,7 +86,7 @@ _Этот раздел заполняется вместе с автором. К
   - Each non-Foxy animatronic has a `level` (0..4). Every `TICK_INTERVAL` (2 sec), they have a chance to advance one level. At level 4 they're at your door — if you don't close it within `DOOR_ATTACK_DELAY` (2.5 sec), death. Closing the door retreats them to level 2.
   - `ADVANCE_CHANCE`: bonnie 0.32, chica 0.28, freddy 0.18. Multiplied by `1 + elapsed/TOTAL_TIME * 0.6` so it ramps up.
   - **Foxy** is special: he stays in Pirate Cove. A `restless` timer grows when his cam isn't being viewed. If it exceeds `FOXY_RESTLESS_LIMIT` (12 sec), he charges. The player has `FOXY_ATTACK_WINDOW` (2.5 sec) to close the left door. Successful block costs −5% power. The cove camera button blinks red when restless > 70% of the limit.
-- **Power:** drains at `usage × POWER_DRAIN_PER_USAGE` (0.45) per second. Usage = 1 (base) + 1 per active item (each door, each light, camera). Max usage = 6 → drains 2.7%/sec. Power 0 → black screen → Freddy's eyes appear → Toreador melody plays → jumpscare → `IDK.html`.
+- **Power:** drains at `usage × POWER_DRAIN_PER_USAGE` (0.30) per second. Usage = 1 (base) + 1 per active item (each door, each light, camera). Max usage = 6 → drains 1.8%/sec. Power 0 → black screen → Freddy's eyes appear → Toreador melody plays → jumpscare → `IDK.html`.
 - **Camera view:** four cameras with different scene backgrounds (stage curtains, cove letterboard, hallway perspective). Each camera shows whichever animatronic's level matches that room. CCTV scanlines + noise overlay. Mini-map in bottom-right with 4 buttons.
 - **Death paths:** Bonnie/Chica/Freddy door attack, Foxy charge, power-out → all run shared scary jumpscare → `IDK.html`.
 - **Win:** survive to 6 AM → green "6:00 AM" screen → `credits.html`.
