@@ -4,7 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <script>document.documentElement.classList.toggle('is-mobile', window.matchMedia('(hover: none) and (pointer: coarse)').matches);</script>
-  <title>Night 4 – Freddy</title>
+  <title>Night 4 — The Puppet</title>
+
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Creepster&family=Share+Tech+Mono&display=swap');
 
@@ -12,15 +13,24 @@
 
     html, body {
       background: #000;
-      color: #fff;
+      color: #eee;
       font-family: 'Share Tech Mono', monospace;
       overflow: hidden;
-      width: 100vw;
-      height: 100vh;
-      cursor: crosshair;
-      user-select: none;
+      width: 100vw; height: 100vh;
+      -webkit-user-select: none; user-select: none;
     }
 
+    /* Faint CRT scanlines on top of everything */
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background: repeating-linear-gradient(0deg, rgba(255,255,255,0.04) 0 1px, transparent 1px 3px);
+      z-index: 200;
+    }
+
+    /* ─────────── BASE SCREENS ─────────── */
     .screen {
       position: absolute;
       inset: 0;
@@ -32,35 +42,38 @@
       padding: 20px;
     }
 
-    /* ───────────────────────── START SCREEN ───────────────────────── */
+    /* ─────────── START SCREEN ─────────── */
     #startScreen {
-      background: radial-gradient(ellipse at center, #200a05 0%, #000 100%);
+      background: radial-gradient(ellipse at center, #1a0a25 0%, #000 100%);
     }
     #startScreen h1 {
       font-family: 'Creepster', cursive;
-      font-size: clamp(2rem, 6vw, 5rem);
-      color: #ffaa00;
-      text-shadow: 0 0 30px #ff7700, 0 0 60px #aa3300;
-      letter-spacing: 4px;
-      animation: flicker 3s infinite;
+      font-size: clamp(2.5rem, 8vw, 6rem);
+      color: #cc66ff;
+      text-shadow: 0 0 30px #aa44dd, 0 0 60px #6600aa;
+      letter-spacing: 5px;
+      animation: titleFlicker 3.5s infinite;
     }
-    @keyframes flicker {
+    @keyframes titleFlicker {
       0%, 100% { opacity: 1; }
-      50% { opacity: 0.55; }
-      55% { opacity: 0.9; }
+      50%      { opacity: 0.55; }
+      55%      { opacity: 0.9;  }
     }
     #startScreen p {
-      margin-top: 1rem;
-      max-width: 520px;
+      margin-top: 0.9rem;
+      max-width: 540px;
       line-height: 1.7;
       color: #ccc;
     }
-    .key {
+    kbd {
       display: inline-block;
-      padding: 2px 10px;
-      border: 1px solid #ffaa00;
+      padding: 2px 9px;
+      margin: 0 2px;
+      border: 1px solid #cc66ff;
       border-radius: 4px;
-      color: #ffcc66;
+      background: rgba(40,15,55,0.5);
+      color: #ddaaff;
+      font-family: inherit;
     }
     button {
       margin-top: 2rem;
@@ -68,324 +81,340 @@
       font-family: 'Share Tech Mono', monospace;
       font-size: 1.2rem;
       background: black;
-      color: #ffaa00;
-      border: 2px solid #ffaa00;
+      color: #cc66ff;
+      border: 2px solid #cc66ff;
       border-radius: 8px;
       cursor: pointer;
+      letter-spacing: 3px;
       transition: 0.2s;
     }
     button:hover {
-      background: #ffaa00;
+      background: #cc66ff;
       color: black;
-      box-shadow: 0 0 25px #ffaa00;
+      box-shadow: 0 0 25px #cc66ff;
     }
 
-    /* ───────────────────────── GAME SCREEN ───────────────────────── */
+    /* ─────────── GAME SCREEN ─────────── */
     #gameScreen {
       display: none;
-      background: radial-gradient(ellipse at center 70%, #0a0500 0%, #000 80%);
+      background: radial-gradient(ellipse at center 60%, #1a0a30 0%, #050010 70%, #000 100%);
     }
 
-    /* Subtle moving fog using a giant blurred radial gradient */
+    /* Slow drifting purple fog for atmosphere */
     .fog {
       position: absolute;
       inset: -10%;
       background:
-        radial-gradient(circle at 30% 70%, rgba(80,30,0,0.15) 0%, transparent 30%),
-        radial-gradient(circle at 70% 60%, rgba(40,20,0,0.2) 0%, transparent 40%);
-      animation: fogDrift 25s linear infinite;
+        radial-gradient(circle at 30% 70%, rgba(60,30,80,0.18) 0%, transparent 35%),
+        radial-gradient(circle at 70% 60%, rgba(80,30,60,0.18) 0%, transparent 40%);
+      animation: fogDrift 20s ease-in-out infinite;
       pointer-events: none;
     }
     @keyframes fogDrift {
-      0%   { transform: translate(0, 0); }
-      50%  { transform: translate(-40px, 30px); }
-      100% { transform: translate(0, 0); }
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      50%      { transform: translate(-30px, 20px) scale(1.05); }
     }
 
-    /* Faint TV static overlay (tiny CSS noise pattern) */
-    .static {
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-      opacity: 0.04;
-      background-image:
-        repeating-linear-gradient(0deg, rgba(255,255,255,0.5) 0 1px, transparent 1px 2px);
-    }
-
-    /* ───── Freddy silhouette (CSS art, no images needed) ─────
-       Stacked shapes form a bear: hat, ears, head, body, bowtie. */
-    #freddyWrap {
-      position: absolute;
-      left: 50%;
-      bottom: 8%;
-      transform: translateX(-50%);
-      width: 360px;
-      height: 480px;
-      transition: transform 0.4s cubic-bezier(.5,0,.5,1);
-      animation: breathing 4s ease-in-out infinite;
-    }
-    @keyframes breathing {
-      0%, 100% { transform: translateX(-50%) scale(1.00); }
-      50%      { transform: translateX(-50%) scale(1.02); }
-    }
-    #freddyWrap.zoom    { animation: zoomIn 0.45s ease-out; }
-    #freddyWrap.lunge   { animation: lunge 0.35s ease-out; }
-    #freddyWrap.tilt    { animation: tilt 0.6s ease-in-out; }
-    @keyframes zoomIn {
-      0%   { transform: translateX(-50%) scale(1.02); }
-      50%  { transform: translateX(-50%) scale(1.45); }
-      100% { transform: translateX(-50%) scale(1.02); }
-    }
-    @keyframes lunge {
-      0%, 100% { transform: translateX(-50%) translateY(0)   scale(1.02); }
-      40%      { transform: translateX(-50%) translateY(-30px) scale(1.20); }
-    }
-    @keyframes tilt {
-      0%, 100% { transform: translateX(-50%) rotate(0); }
-      50%      { transform: translateX(-50%) rotate(8deg); }
-    }
-
-    /* Body */
-    .body {
-      position: absolute;
-      bottom: 0; left: 50%;
-      transform: translateX(-50%);
-      width: 320px;
-      height: 260px;
-      background: radial-gradient(ellipse at 50% 30%, #2a1a08 0%, #110800 70%);
-      border-radius: 50% 50% 40% 40% / 60% 60% 40% 40%;
-      box-shadow: 0 0 40px #00000088 inset;
-    }
-    /* Bowtie */
-    .bowtie {
-      position: absolute;
-      bottom: 200px; left: 50%;
-      transform: translateX(-50%);
-      width: 70px;
-      height: 30px;
-      z-index: 3;
-    }
-    .bowtie::before, .bowtie::after {
-      content: ""; position: absolute; top: 0;
-      width: 30px; height: 30px;
-      background: #1a0500;
-      clip-path: polygon(0 0, 100% 50%, 0 100%);
-    }
-    .bowtie::before { left: 0; }
-    .bowtie::after { right: 0; transform: scaleX(-1); }
-    .bowtie .knot {
-      position: absolute;
-      left: 50%; top: 50%;
-      transform: translate(-50%, -50%);
-      width: 14px; height: 18px;
-      background: #1a0500;
-      border-radius: 3px;
-    }
-    /* Head */
-    .head {
-      position: absolute;
-      top: 60px; left: 50%;
-      transform: translateX(-50%);
-      width: 240px;
-      height: 240px;
-      background: radial-gradient(circle at 50% 35%, #2e1a08 0%, #0e0500 75%);
-      border-radius: 50%;
-      box-shadow:
-        0 0 30px #00000088 inset,
-        0 0 25px #000000 inset;
-      z-index: 2;
-    }
-    /* Ears */
-    .ear {
-      position: absolute;
-      top: 30px;
-      width: 80px; height: 80px;
-      background: radial-gradient(circle at 50% 50%, #2e1a08, #0e0500);
-      border-radius: 50%;
-      z-index: 1;
-    }
-    .earL { left: calc(50% - 130px); }
-    .earR { right: calc(50% - 130px); }
-    /* Snout */
-    .snout {
-      position: absolute;
-      bottom: 80px; left: 50%;
-      transform: translateX(-50%);
-      width: 110px;
-      height: 70px;
-      background: radial-gradient(ellipse at 50% 50%, #3a2510, #1a0a00);
-      border-radius: 50%;
-      z-index: 3;
-    }
-    /* Top hat */
-    .hat {
-      position: absolute;
-      top: -10px; left: 50%;
-      transform: translateX(-50%);
-      width: 130px;
-      height: 90px;
-      background: #0a0a0a;
-      border-radius: 4px 4px 0 0;
-      z-index: 4;
-      box-shadow: 0 -4px 0 #000 inset;
-    }
-    .hat::before {
-      content: "";
-      position: absolute;
-      bottom: -10px;
-      left: -25px;
-      width: 180px; height: 14px;
-      background: #0a0a0a;
-      border-radius: 7px;
-    }
-    .hat::after {
-      content: "";
-      position: absolute;
-      bottom: 10px;
-      left: 0;
-      width: 100%;
-      height: 6px;
-      background: #1a0500;
-    }
-
-    /* Eyes — they GLOW and follow the mouse cursor */
-    .eyes {
-      position: absolute;
-      top: 130px; left: 50%;
-      transform: translateX(-50%);
-      width: 180px;
-      display: flex;
-      justify-content: space-between;
-      z-index: 5;
-    }
-    .eye {
-      position: relative;
-      width: 60px; height: 60px;
-      background: #050200;
-      border-radius: 50%;
-      box-shadow: 0 0 20px #ff880088 inset;
-      overflow: hidden;
-    }
-    .pupil {
-      position: absolute;
-      top: 50%; left: 50%;
-      width: 28px; height: 28px;
-      background: radial-gradient(circle at 50% 50%, #ffee66 0%, #ff7700 60%, #aa3300 100%);
-      border-radius: 50%;
-      box-shadow:
-        0 0 18px #ff8800,
-        0 0 35px #ff5500,
-        0 0 55px #ff3300;
-      transform: translate(-50%, -50%);
-      transition: transform 0.08s linear, box-shadow 0.2s ease, background 0.2s;
-      animation: eyePulse 1.6s ease-in-out infinite;
-    }
-    @keyframes eyePulse {
-      0%, 100% { box-shadow: 0 0 18px #ff8800, 0 0 35px #ff5500, 0 0 55px #ff3300; }
-      50%      { box-shadow: 0 0 24px #ffaa33, 0 0 50px #ff6600, 0 0 80px #ff4400; }
-    }
-    /* When a scare hits, eyes flare bright */
-    .pupil.scared {
-      background: radial-gradient(circle, #ffffff 0%, #ffaa00 60%, #ff3300 100%);
-      box-shadow: 0 0 40px #ffffff, 0 0 80px #ffaa00, 0 0 120px #ff5500;
-    }
-
-    /* ───── HUD: timer (top-left) and fear meter (top-right) ───── */
+    /* ─────────── HUD ─────────── */
     .hud {
       position: absolute;
-      top: 20px;
-      padding: 10px 16px;
-      background: rgba(0,0,0,0.7);
-      border: 1px solid #ffaa00;
+      top: 16px;
+      padding: 8px 14px;
+      background: rgba(20,5,30,0.7);
+      border: 1px solid #6633aa;
       border-radius: 6px;
-      font-size: 1.1rem;
-      backdrop-filter: blur(2px);
+      font-size: 0.95rem;
+      letter-spacing: 2px;
       z-index: 10;
     }
-    #timer { left: 20px; }
-    #fearBox { right: 20px; min-width: 220px; }
-    .fearBar {
+    #timer    { left: 16px; }
+    #musicBox { right: 16px; min-width: 220px; }
+    .musicBar {
+      width: 100%;
+      height: 8px;
+      background: #220a30;
+      border: 1px solid #6633aa;
+      border-radius: 3px;
       margin-top: 6px;
-      height: 12px;
-      background: #1a0500;
-      border: 1px solid #ffaa00;
-      border-radius: 4px;
       overflow: hidden;
     }
-    .fearFill {
+    .musicFill {
       height: 100%;
-      width: 0%;
-      background: linear-gradient(to right, #ffcc00, #ff5500, #ff0000);
-      transition: width 0.08s linear, box-shadow 0.2s;
+      width: 100%;
+      background: linear-gradient(to right, #cc66ff, #6633aa);
+      transition: width 0.15s linear, background 0.3s;
     }
-    .fearFill.high { box-shadow: 0 0 12px #ff0000, 0 0 24px #ff5500; animation: heartbeat 0.7s infinite; }
-    @keyframes heartbeat {
-      0%, 100% { filter: brightness(1.0); }
-      40%      { filter: brightness(1.4); }
+    .musicFill.low {
+      background: linear-gradient(to right, #ff6644, #aa2200);
+      animation: lowPulse 0.7s infinite;
+    }
+    @keyframes lowPulse {
+      0%,100% { opacity: 1; }
+      50%     { opacity: 0.6; }
     }
 
-    /* ───── Whispers (random text at random screen edges) ───── */
-    #whisper {
+    /* ─────────── PATTERN ROW ───────────
+       The keys the player has to press (in order). Lit one at a time. */
+    #patternRow {
       position: absolute;
-      color: #ff5500;
+      top: 16%;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 18px;
+      z-index: 10;
+    }
+    .patternKey {
+      width: 70px; height: 70px;
+      border-radius: 10px;
+      background: rgba(40,15,55,0.7);
+      border: 2px solid #6633aa;
+      color: #cc99ff;
       font-family: 'Creepster', cursive;
-      font-size: clamp(1rem, 2.5vw, 1.6rem);
-      opacity: 0;
-      pointer-events: none;
-      z-index: 8;
-      text-shadow: 0 0 12px #ff3300;
-      transition: opacity 0.3s;
+      font-size: 2.2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.15s, background 0.2s, box-shadow 0.2s;
+    }
+    /* The "next key to press" pulses brightly */
+    .patternKey.next {
+      background: rgba(80,30,140,0.8);
+      border-color: #cc99ff;
+      color: #fff;
+      transform: scale(1.12);
+      animation: keyPulse 0.7s ease-in-out infinite;
+    }
+    @keyframes keyPulse {
+      0%,100% { box-shadow: 0 0 25px #cc99ff; }
+      50%     { box-shadow: 0 0 50px #cc99ff, 0 0 80px #aa66ff; }
+    }
+    /* Already-pressed keys turn green */
+    .patternKey.done {
+      background: rgba(40,150,40,0.6);
+      border-color: #66ff88;
+      color: #aaffcc;
+      box-shadow: 0 0 18px #44ff66;
+    }
+    /* Wrong key — whole row shakes red */
+    .patternKey.wrong {
+      animation: wrongShake 0.4s;
+      background: rgba(160,30,30,0.7);
+      border-color: #ff4444;
+      color: #ffaaaa;
+    }
+    @keyframes wrongShake {
+      0%,100% { transform: translateX(0); }
+      25%     { transform: translateX(-6px); }
+      75%     { transform: translateX(6px); }
     }
 
-    /* ───── Scare overlays ───── */
-    .flashRed, .flashWhite, .staticBurst {
+    /* "GOOD!" message that flashes when a pattern is completed */
+    #patternMsg {
       position: absolute;
-      inset: 0;
-      pointer-events: none;
+      top: 28%;
+      left: 50%;
+      transform: translateX(-50%);
+      font-family: 'Creepster', cursive;
+      font-size: 2.2rem;
+      color: #66ff88;
+      text-shadow: 0 0 14px #44ff66;
       opacity: 0;
-      z-index: 12;
+      pointer-events: none;
+      z-index: 10;
     }
-    .flashRed   { background: #ff0000; }
-    .flashWhite { background: #ffffff; }
-    .staticBurst {
-      background-image:
-        repeating-linear-gradient(0deg, rgba(255,255,255,0.6) 0 2px, transparent 2px 4px),
-        repeating-linear-gradient(90deg, rgba(255,255,255,0.4) 0 1px, transparent 1px 3px);
-    }
-    .flashRed.show, .flashWhite.show, .staticBurst.show {
-      animation: flashOnce 0.18s;
-    }
-    @keyframes flashOnce {
-      0%   { opacity: 0; }
-      30%  { opacity: 1; }
-      100% { opacity: 0; }
+    #patternMsg.show { animation: msgFlash 0.9s forwards; }
+    @keyframes msgFlash {
+      0%   { opacity: 0; transform: translate(-50%, 10px) scale(0.9); }
+      30%  { opacity: 1; transform: translate(-50%, 0) scale(1.1); }
+      100% { opacity: 0; transform: translate(-50%, -20px) scale(1); }
     }
 
-    /* Whole-game shake */
-    body.shake { animation: shakeBody 0.4s; }
-    @keyframes shakeBody {
-      0%, 100% { transform: translate(0,0); }
-      20% { transform: translate(-8px, 4px); }
-      40% { transform: translate(7px, -5px); }
-      60% { transform: translate(-5px, 6px); }
-      80% { transform: translate(6px, -3px); }
+    /* ─────────── MUSIC BOX (CSS art) ───────────
+       Built from layered divs:
+         box-body  (the wooden cube)
+         box-trim  (brass strip)
+         box-glow  (orange glow leaking from under the lid)
+         box-lid   (hinged on its bottom edge — rotates open with transform)
+         puppet    (sits inside, hidden, peeks/rises when lid opens) */
+    #musicBoxArt {
+      position: absolute;
+      top: 56%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 280px;
+      height: 280px;
     }
-
-    /* ───── Stillness indicator: a small dot you should keep cursor on ───── */
-    .stareDot {
+    .box-body {
+      position: absolute;
+      bottom: 0; left: 0;
+      width: 100%;
+      height: 200px;
+      background:
+        repeating-linear-gradient(90deg, rgba(0,0,0,0.15) 0 1px, transparent 1px 8px),
+        linear-gradient(to bottom, #5a3018 0%, #2a1408 100%);
+      border: 4px solid #1a0a04;
+      border-radius: 6px 6px 10px 10px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.7), 0 0 25px rgba(80,30,140,0.4) inset;
+      z-index: 1;
+    }
+    /* Brass trim along the top edge of the body */
+    .box-trim {
+      position: absolute;
+      bottom: 192px;
+      left: 0;
+      width: 100%;
+      height: 12px;
+      background: repeating-linear-gradient(90deg, #aa7733 0 6px, #663311 6px 12px);
+      border: 2px solid #1a0a04;
+      border-radius: 3px;
+      z-index: 2;
+    }
+    /* Orange glow leaking from the seam between box and lid */
+    .box-glow {
+      position: absolute;
+      bottom: 198px;
+      left: 8%;
+      width: 84%;
+      height: 10px;
+      background: radial-gradient(ellipse, #ffd066 0%, #ff7733 50%, transparent 80%);
+      filter: blur(3px);
+      opacity: 0.5;
+      z-index: 2;
+      animation: glowBreath 2s ease-in-out infinite;
+    }
+    @keyframes glowBreath {
+      0%,100% { opacity: 0.3; }
+      50%     { opacity: 0.7; }
+    }
+    /* Hinged lid — rotates from its bottom-left corner so it opens like a chest */
+    .box-lid {
+      position: absolute;
+      bottom: 200px;
+      left: 0;
+      width: 100%;
+      height: 50px;
+      background:
+        repeating-linear-gradient(90deg, rgba(0,0,0,0.15) 0 1px, transparent 1px 8px),
+        linear-gradient(to bottom, #6a3818 0%, #3a1808 100%);
+      border: 4px solid #1a0a04;
+      border-radius: 8px 8px 0 0;
+      transform-origin: bottom left;
+      transform: rotateX(0deg);
+      transition: transform 0.4s;
+      z-index: 4;
+    }
+    /* Wind-up handle on the side — spins faster when music is high */
+    .box-handle {
+      position: absolute;
+      top: 60%;
+      right: -28px;
+      width: 50px; height: 50px;
+      animation: handleSpin var(--spin, 4s) linear infinite;
+      z-index: 5;
+    }
+    .box-handle::before, .box-handle::after {
+      content: "";
       position: absolute;
       top: 50%; left: 50%;
-      transform: translate(-50%, -50%);
-      width: 14px; height: 14px;
-      background: #ff8800;
-      border-radius: 50%;
-      box-shadow: 0 0 18px #ff8800;
-      opacity: 0.85;
-      pointer-events: none;
-      z-index: 7;
+      background: #aa7733;
+      border-radius: 2px;
+    }
+    .box-handle::before { width: 4px;  height: 30px; transform: translate(-50%, -50%); }
+    .box-handle::after  { width: 30px; height: 4px;  transform: translate(-50%, -50%); }
+    @keyframes handleSpin {
+      from { transform: rotate(0deg); }
+      to   { transform: rotate(360deg); }
     }
 
-    /* ─────────────────────── WIN SCREEN ─────────────────────── */
+    /* ─── PUPPET — built from div shapes inside the box ─── */
+    #puppet {
+      position: absolute;
+      bottom: 30px;
+      left: 50%;
+      transform: translate(-50%, 100%);   /* hidden below the lid by default */
+      width: 130px;
+      transition: transform 0.6s;
+      z-index: 3;                          /* between body (1) and lid (4) */
+    }
+    /* When the lid opens slightly, the puppet peeks out */
+    #musicBoxArt.warn   #puppet { transform: translate(-50%, 50%); }
+    #musicBoxArt.danger #puppet { transform: translate(-50%, 0%);  }
+
+    .puppet-face {
+      position: relative;
+      width: 110px; height: 130px;
+      margin: 0 auto;
+      background: radial-gradient(circle at 50% 40%, #fff 0%, #ddd 70%, #888 100%);
+      border-radius: 50% 50% 45% 45%;
+      box-shadow: 0 0 30px rgba(255,200,200,0.4);
+    }
+    .puppet-face .eye {
+      position: absolute;
+      top: 36%;
+      width: 18px; height: 22px;
+      background: #000;
+      border-radius: 50%;
+    }
+    .puppet-face .eye.left  { left: 22%; }
+    .puppet-face .eye.right { right: 22%; }
+    .puppet-face .eye .pupil {
+      position: absolute;
+      top: 30%; left: 30%;
+      width: 6px; height: 6px;
+      background: #fff;
+      border-radius: 50%;
+    }
+    /* Black tear streaks down from the eyes */
+    .puppet-face .streak {
+      position: absolute;
+      top: 50%;
+      width: 6px;
+      height: 38px;
+      background: linear-gradient(to bottom, #000 0%, transparent 100%);
+      border-radius: 0 0 50% 50%;
+    }
+    .puppet-face .streak.left  { left: 27%; }
+    .puppet-face .streak.right { right: 27%; }
+    /* Pink rosy cheeks */
+    .puppet-face .cheek {
+      position: absolute;
+      top: 56%;
+      width: 22px; height: 14px;
+      background: radial-gradient(ellipse, #ff6688, transparent 70%);
+      border-radius: 50%;
+    }
+    .puppet-face .cheek.left  { left: 8%; }
+    .puppet-face .cheek.right { right: 8%; }
+    /* Wide red mouth */
+    .puppet-face .mouth {
+      position: absolute;
+      top: 72%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 60px; height: 16px;
+      background: #cc1144;
+      border-radius: 0 0 50% 50% / 0 0 80% 80%;
+    }
+
+    /* ─── DEATH SEQUENCE — when music hits 0 ─── */
+    #musicBoxArt.dying { animation: dyingShake 0.18s linear infinite; }
+    #musicBoxArt.dying .box-lid {
+      transform: rotateX(-95deg);
+      box-shadow: 0 0 60px #ff0000;
+    }
+    #musicBoxArt.dying #puppet {
+      transform: translate(-50%, -180%) scale(2.2);
+      transition: transform 0.9s ease-out;
+    }
+    @keyframes dyingShake {
+      0%,100% { transform: translate(-50%, -50%); }
+      25%     { transform: translate(-52%, -48%); }
+      50%     { transform: translate(-48%, -52%); }
+      75%     { transform: translate(-50%, -50%); }
+    }
+
+    /* ─────────── WIN SCREEN ─────────── */
     #winScreen {
       display: none;
       background: radial-gradient(ellipse at center, #00220a 0%, #000 100%);
@@ -393,383 +422,55 @@
     #winScreen h1 {
       font-family: 'Creepster', cursive;
       font-size: clamp(3rem, 10vw, 8rem);
-      color: #44ff44;
-      text-shadow: 0 0 30px #00ff00, 0 0 60px #00aa00;
+      color: #44ff88;
+      text-shadow: 0 0 30px #00ff66;
     }
+    #winScreen p { margin-top: 1rem; max-width: 480px; color: #aaeeaa; }
 
-    /* ─────────────────────── DEATH OVERLAY ─────────────────────── */
-    /* When fear hits 100, a giant Freddy face fills the screen for 0.6s
-       before redirecting to IDK.html. */
-    #jumpscareOverlay {
-      position: absolute;
-      inset: 0;
-      display: none;
-      z-index: 9999;
-      background: radial-gradient(circle at 50% 50%, #5a3010 0%, #000 80%);
-    }
-    #jumpscareOverlay .bigFace {
-      position: absolute;
-      top: 50%; left: 50%;
-      transform: translate(-50%, -50%) scale(0.2);
-      width: 90vmin; height: 90vmin;
-      background: radial-gradient(circle at 50% 35%, #3a2010 0%, #0a0500 75%);
-      border-radius: 50%;
-      box-shadow: 0 0 80px #000000 inset, 0 0 100px #ff550066;
-      animation: jumpscareGrow 0.6s ease-out forwards;
-    }
-    @keyframes jumpscareGrow {
-      0%   { transform: translate(-50%, -50%) scale(0.3); opacity: 0; }
-      30%  { transform: translate(-50%, -50%) scale(1.1); opacity: 1; }
-      100% { transform: translate(-50%, -50%) scale(1.4); opacity: 1; }
-    }
-    #jumpscareOverlay .bigEyes {
-      position: absolute;
-      top: 50%; left: 50%;
-      transform: translate(-50%, -50%);
-      display: flex;
-      gap: 18vmin;
-      z-index: 10000;
-    }
-    #jumpscareOverlay .bigEyes div {
-      width: 14vmin; height: 14vmin;
-      background: radial-gradient(circle, #ffffff 0%, #ffaa00 60%, #ff3300 100%);
-      border-radius: 50%;
-      box-shadow: 0 0 60px #ffffff, 0 0 120px #ffaa00, 0 0 200px #ff3300;
-      animation: eyesAttack 0.6s ease-out forwards;
-    }
-    @keyframes eyesAttack {
-      0%   { transform: scale(0.3); opacity: 0; }
-      40%  { transform: scale(1.3); opacity: 1; }
-      100% { transform: scale(1.0); opacity: 1; }
-    }
-
-    /* ═══════════════════ HALLUCINATIONS ═══════════════════ */
-
-    /* Ghostly mini-Freddys that pop up at random spots — "are you seeing things?" */
-    .ghost-freddy {
-      position: absolute;
-      width: 90px; height: 120px;
-      pointer-events: none;
-      opacity: 0;
-      filter: blur(2px);
-      z-index: 7;
-      animation: ghostPop 0.5s ease-out forwards;
-    }
-    .ghost-freddy .gf-head {
-      position: absolute;
-      width: 100%; height: 80px;
-      top: 10px;
-      background: radial-gradient(ellipse at 50% 30%, #2a1a08, #0a0500 80%);
-      border-radius: 50%;
-    }
-    .ghost-freddy .gf-eyes {
-      position: absolute;
-      top: 38px;
-      left: 50%;
-      transform: translateX(-50%);
-      display: flex;
-      gap: 18px;
-      z-index: 1;
-    }
-    .ghost-freddy .gf-eyes div {
-      width: 10px; height: 10px;
-      background: #ff6600;
-      border-radius: 50%;
-      box-shadow: 0 0 10px #ff3300, 0 0 20px #ff0000;
-    }
-    @keyframes ghostPop {
-      0%   { opacity: 0; transform: scale(0.6); }
-      30%  { opacity: 0.75; transform: scale(1); }
-      70%  { opacity: 0.5; transform: scale(1.05); }
-      100% { opacity: 0; transform: scale(1); }
-    }
-
-    /* Pairs of red eyes opening in the dark */
-    .eye-pair {
-      position: absolute;
-      display: flex;
-      gap: 24px;
-      pointer-events: none;
-      opacity: 0;
-      z-index: 7;
-      animation: eyePairPop 0.6s ease-out forwards;
-    }
-    .eye-pair div {
-      width: 14px; height: 14px;
-      background: radial-gradient(circle, #ffeeee, #ff0000);
-      border-radius: 50%;
-      box-shadow: 0 0 18px #ff0000, 0 0 35px #ff0000;
-    }
-    @keyframes eyePairPop {
-      0%   { opacity: 0; }
-      20%  { opacity: 1; }
-      80%  { opacity: 1; }
-      100% { opacity: 0; }
-    }
-
-    /* Blood splatter overlay */
-    .blood-splat {
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-      opacity: 0;
-      z-index: 11;
-      background:
-        radial-gradient(ellipse 250px 130px at 25% 20%, #800000 0%, transparent 70%),
-        radial-gradient(ellipse 300px 160px at 75% 60%, #5a0000 0%, transparent 70%),
-        radial-gradient(circle 180px at 50% 85%, #500000 0%, transparent 70%);
-      animation: bloodSplat 0.7s ease-out forwards;
-      mix-blend-mode: multiply;
-    }
-    @keyframes bloodSplat {
-      0%   { opacity: 0; transform: scale(0.5); }
-      30%  { opacity: 0.95; transform: scale(1); }
-      100% { opacity: 0; transform: scale(1.1); }
-    }
-
-    /* Big "BEHIND YOU" / "RUN" warning text flashes */
-    .warning-text {
-      position: absolute;
-      top: 35%; left: 50%;
-      transform: translate(-50%, -50%);
-      font-family: 'Creepster', cursive;
-      font-size: clamp(2.5rem, 9vw, 6rem);
-      color: #ff0000;
-      text-shadow: 0 0 30px #ff0000, 0 0 60px #aa0000, 0 0 100px #ff0000;
-      letter-spacing: 6px;
-      pointer-events: none;
-      opacity: 0;
-      z-index: 9;
-      animation: warnShow 0.8s ease-out forwards;
-    }
-    @keyframes warnShow {
-      0%   { opacity: 0; transform: translate(-50%, -50%) scale(0.7); }
-      30%  { opacity: 1; transform: translate(-50%, -50%) scale(1.15); }
-      70%  { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-      100% { opacity: 0; transform: translate(-50%, -50%) scale(1.1); }
-    }
-
-    /* Heartbeat full-screen red pulse */
-    .heartbeat-pulse {
-      position: absolute;
-      inset: 0;
-      background: #ff0000;
-      pointer-events: none;
-      opacity: 0;
-      z-index: 11;
-      animation: heartbeatPulse 1.2s ease-out forwards;
-    }
-    @keyframes heartbeatPulse {
-      0%   { opacity: 0; }
-      15%  { opacity: 0.5; }
-      30%  { opacity: 0.05; }
-      45%  { opacity: 0.5; }
-      60%  { opacity: 0.05; }
-      75%  { opacity: 0.4; }
-      100% { opacity: 0; }
-    }
-
-    /* "Other animatronic" hallucination heads that flash on screen */
-    .alt-head {
-      position: absolute;
-      top: 28%; left: 50%;
-      width: 220px; height: 220px;
-      border-radius: 50%;
-      pointer-events: none;
-      opacity: 0;
-      z-index: 8;
-      animation: altHeadFlash 0.45s ease-out forwards;
-      box-shadow: 0 0 40px #00000099 inset;
-    }
-    @keyframes altHeadFlash {
-      0%   { opacity: 0; transform: translate(-50%, 0) scale(0.5); }
-      40%  { opacity: 0.9; transform: translate(-50%, 0) scale(1.25); }
-      100% { opacity: 0; transform: translate(-50%, 0) scale(0.95); }
-    }
-    .alt-foxy   { background: radial-gradient(circle at 50% 35%, #6b1a08, #1a0500 75%); }
-    .alt-bonnie { background: radial-gradient(circle at 50% 35%, #3a3a6a, #0a0a1a 75%); }
-    .alt-chica  { background: radial-gradient(circle at 50% 35%, #aaaa30, #4a4a10 75%); }
-    .alt-head .alt-eye {
-      position: absolute;
-      top: 35%;
-      width: 28px; height: 28px;
-      background: radial-gradient(circle, #ffffff, #ff0000);
-      border-radius: 50%;
-      box-shadow: 0 0 20px #ff0000, 0 0 40px #ff0000;
-    }
-    .alt-head .alt-eye.l { left: 28%; }
-    .alt-head .alt-eye.r { right: 28%; }
-
-    /* HUD glitch — boxes shake and turn red briefly */
-    #timer.glitch, #fearBox.glitch {
-      animation: hudGlitch 0.45s linear;
-      color: #ff0000;
-      border-color: #ff0000;
-    }
-    @keyframes hudGlitch {
-      0%, 100% { transform: translate(0, 0); }
-      20% { transform: translate(-4px, 2px); filter: hue-rotate(180deg); }
-      40% { transform: translate(3px, -3px); filter: invert(1); }
-      60% { transform: translate(-3px, 3px); filter: hue-rotate(-90deg); }
-      80% { transform: translate(2px, -1px); }
-    }
-
-    /* Freddy "teleport" — flickers to one side and back */
-    #freddyWrap.teleport {
-      animation: teleportFlicker 0.5s steps(6, end);
-    }
-    @keyframes teleportFlicker {
-      0%   { opacity: 1; transform: translateX(-50%) scale(1.02); }
-      20%  { opacity: 0.0; transform: translateX(calc(-50% - 120px)) scale(1.02); }
-      40%  { opacity: 0.6; transform: translateX(calc(-50% - 60px)) scale(1.02); }
-      60%  { opacity: 0.0; transform: translateX(calc(-50% + 120px)) scale(1.02); }
-      80%  { opacity: 0.6; transform: translateX(calc(-50% + 60px)) scale(1.02); }
-      100% { opacity: 1; transform: translateX(-50%) scale(1.02); }
-    }
-
-    /* Color-invert flash — entire game inverts colors briefly (very disorienting) */
-    body.invert-flash { animation: invertOnce 0.25s ease-out; }
-    @keyframes invertOnce {
-      0%   { filter: none; }
-      30%  { filter: invert(1) hue-rotate(180deg); }
-      100% { filter: none; }
-    }
-
-    /* ═══════════════════ TOY BONNIE ═══════════════════ */
-    /* Tiny purple Bonnie who floats around the screen and tempts you.
-       Cursor near him → he glows green (he's happy).
-       He shows speech bubbles asking you to press keys for HARDER MODE. */
-    #toyBonnie {
-      position: absolute;
-      width: 70px;
-      height: 110px;
-      pointer-events: none;
-      z-index: 6;
-      transition: filter 0.25s ease-out;
-      filter: drop-shadow(0 0 10px #6633aa);
-    }
-    #toyBonnie.happy {
-      filter: drop-shadow(0 0 18px #88ff66) drop-shadow(0 0 30px #44ff44);
-    }
-    #toyBonnie .tb-ear {
-      position: absolute;
-      width: 18px;
-      height: 50px;
-      background: linear-gradient(to bottom, #8855cc, #2a1855);
-      border-radius: 50% 50% 25% 25% / 60% 60% 40% 40%;
-    }
-    #toyBonnie .tb-ear.left  { top: 0; left: 14px;  transform: rotate(-7deg); }
-    #toyBonnie .tb-ear.right { top: 0; right: 14px; transform: rotate(7deg); }
-    #toyBonnie .tb-head {
-      position: absolute;
-      top: 35px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 60px;
-      height: 55px;
-      background: radial-gradient(circle at 50% 35%, #aa77dd 0%, #4a2880 80%);
-      border-radius: 50%;
-      box-shadow: 0 0 12px #00000088 inset;
-    }
-    #toyBonnie .tb-eye {
-      position: absolute;
-      top: 53px;
-      width: 9px;
-      height: 9px;
-      background: radial-gradient(circle, #ffeeff, #ff0066 70%);
-      border-radius: 50%;
-      box-shadow: 0 0 6px #ff0066, 0 0 12px #ff0066;
-      z-index: 2;
-    }
-    #toyBonnie .tb-eye.left  { left: calc(50% - 14px); }
-    #toyBonnie .tb-eye.right { right: calc(50% - 14px); }
-    #toyBonnie .tb-bowtie {
-      position: absolute;
-      top: 80px;
-      left: 50%;
-      width: 30px;
-      height: 12px;
-      transform: translateX(-50%);
-      background: #ff3366;
-      clip-path: polygon(0 50%, 30% 0, 30% 100%, 70% 0, 70% 100%, 100% 50%);
-      box-shadow: 0 0 6px #ff3366;
-    }
-
-    /* Speech bubble that floats next to Bonnie with key prompts */
-    #bonnieSpeech {
-      position: absolute;
-      width: 200px;
-      pointer-events: none;
-      z-index: 6;
-      font-family: 'Share Tech Mono', monospace;
-      font-size: 12px;
-      background: rgba(40, 5, 60, 0.92);
-      color: #ffaaff;
-      border: 1px solid #ff66ff;
-      border-radius: 8px;
-      padding: 8px 10px;
-      box-shadow: 0 0 18px #ff00ff66;
-      opacity: 0;
-      transition: opacity 0.3s;
-      text-align: center;
-      text-shadow: 0 0 4px #ff00ff;
-    }
-    #bonnieSpeech.show { opacity: 0.95; }
-    #bonnieSpeech .key-hint {
-      display: inline-block;
-      background: #2a0044;
-      color: #ffeeff;
-      padding: 3px 9px;
-      border-radius: 4px;
-      border: 1px solid #ff66ff;
-      margin: 0 4px 4px 4px;
-      font-weight: bold;
-      font-size: 14px;
-      box-shadow: 0 0 6px #ff66ff66;
-    }
-    #bonnieSpeech .activated {
-      color: #ff4488;
-      font-weight: bold;
-      letter-spacing: 2px;
-    }
-
-    /* "HARD MODE" indicator pinned bottom-left, listing active effects */
-    #hardModeBox {
-      position: absolute;
-      bottom: 20px;
-      left: 20px;
-      padding: 8px 12px;
-      background: rgba(40, 0, 60, 0.7);
-      border: 1px solid #ff66ff;
-      border-radius: 6px;
-      font-family: 'Share Tech Mono', monospace;
-      font-size: 11px;
-      color: #ffaaff;
-      letter-spacing: 1px;
-      z-index: 10;
-      max-width: 260px;
-      line-height: 1.5;
-      display: none;
-    }
-    #hardModeBox.show { display: block; }
-    #hardModeBox .label { color: #ff66ff; font-weight: bold; letter-spacing: 2px; }
-
-    /* ─────────── MOBILE-ONLY ───────────
-       Hidden on desktop. Triggered when <html class="is-mobile"> is set
-       by the inline detector in <head>. PC version is left alone. */
-
-    /* Pair of helpers so we can show/hide bits of text per device */
+    /* ─────────── MOBILE-ONLY ─────────── */
     .mobile-only  { display: none; }
     .desktop-only { display: block; }
     html.is-mobile .mobile-only  { display: block; }
     html.is-mobile .desktop-only { display: none; }
 
-    /* On mobile, Bonnie's speech bubble becomes tappable — that's how
-       you "agree" to a hard-mode prompt instead of pressing Q/F/N/C. */
-    html.is-mobile #bonnieSpeech {
-      cursor: pointer;
-      border-color: #ffaa44;
-      box-shadow: 0 0 14px rgba(255,170,68,0.7);
+    /* Touch keypad — D-pad layout at bottom-right of the screen.
+       Only visible on mobile. Tapping these triggers the same key handler
+       as keyboard, so all the game logic is shared. */
+    #touchPad {
+      display: none;
+      position: absolute;
+      bottom: 18px;
+      right: 18px;
+      width: 230px;
+      height: 230px;
+      z-index: 30;
+      touch-action: none;
+    }
+    html.is-mobile #touchPad { display: block; }
+    .touchKey {
+      position: absolute;
+      width: 70px; height: 70px;
+      border-radius: 12px;
+      background: rgba(40,15,55,0.85);
+      border: 2px solid #6633aa;
+      color: #cc99ff;
+      font-family: 'Creepster', cursive;
+      font-size: 2.2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: 0.1s;
+      -webkit-user-select: none; user-select: none;
+    }
+    .touchKey[data-key="W"] { top: 0;     left: 80px; }
+    .touchKey[data-key="A"] { top: 80px;  left: 0; }
+    .touchKey[data-key="S"] { top: 80px;  left: 80px; }
+    .touchKey[data-key="D"] { top: 80px;  left: 160px; }
+    .touchKey.pressed {
+      background: #cc66ff;
+      color: #000;
+      transform: scale(0.9);
+      box-shadow: 0 0 30px #cc66ff;
     }
   </style>
 </head>
@@ -778,386 +479,279 @@
   <!-- ─────────── START SCREEN ─────────── -->
   <div id="startScreen" class="screen">
     <h1>NIGHT 4</h1>
-    <p style="margin-top:1rem;">Freddy is in the room with you.</p>
-    <p>He only moves when YOU move. Stay perfectly still.</p>
-    <p class="desktop-only">Keep your mouse on the orange dot. Don't press any keys.</p>
-    <p class="mobile-only"><strong>Don't touch the screen.</strong> Don't move your finger over it. Don't tap.</p>
-    <p>He will try to scare you. Don't flinch. Survive 1 minute 30 seconds.</p>
-    <p style="margin-top:1.2rem;color:#888;">If you flinch too much, he gets you.</p>
-    <p class="desktop-only" style="margin-top:0.6rem;color:#cc88ff;">Watch out for the toy Bonnie. He'll try to make you press keys. Don't.</p>
-    <p class="mobile-only" style="margin-top:0.6rem;color:#cc88ff;">Watch out for the toy Bonnie. He'll show buttons. Tapping them makes the night HARDER.</p>
-    <button onclick="startGame()">FACE FREDDY</button>
+    <p style="margin-top:1rem;">The Puppet sleeps inside the music box.</p>
+    <p>Wind it up by pressing the keys in the right order.</p>
+    <p class="desktop-only">Use <kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd> on the keyboard.</p>
+    <p class="mobile-only">Tap the buttons in the right order.</p>
+    <p>If the music dies — <span style="color:#ff6688">the Puppet wakes up.</span></p>
+    <p style="margin-top:1.2rem;color:#888;">Survive 1 minute 30 seconds.</p>
+    <button onclick="startGame()">FACE THE PUPPET</button>
   </div>
 
   <!-- ─────────── GAME SCREEN ─────────── -->
   <div id="gameScreen" class="screen">
     <div class="fog"></div>
-    <div class="static"></div>
 
-    <div id="freddyWrap">
-      <div class="hat"></div>
-      <div class="ear earL"></div>
-      <div class="ear earR"></div>
-      <div class="head"></div>
-      <div class="snout"></div>
-      <div class="eyes">
-        <div class="eye"><div class="pupil" id="pupilL"></div></div>
-        <div class="eye"><div class="pupil" id="pupilR"></div></div>
-      </div>
-      <div class="bowtie"><div class="knot"></div></div>
-      <div class="body"></div>
-    </div>
-
-    <div class="stareDot"></div>
-    <div id="whisper"></div>
-
+    <!-- HUD -->
     <div id="timer" class="hud">Time: 1:30</div>
-    <div id="fearBox" class="hud">
-      Fear: <span id="fearPct">0</span>%
-      <div class="fearBar"><div class="fearFill" id="fearFill"></div></div>
+    <div id="musicBox" class="hud">
+      Music: <span id="musicPct">100</span>%
+      <div class="musicBar"><div class="musicFill" id="musicFill"></div></div>
     </div>
 
-    <div class="flashRed"    id="flashRed"></div>
-    <div class="flashWhite"  id="flashWhite"></div>
-    <div class="staticBurst" id="staticBurst"></div>
+    <!-- Pattern keys (filled in by JS each round) -->
+    <div id="patternRow"></div>
+    <div id="patternMsg"></div>
 
-    <!-- Toy Bonnie — floats around, taunts you with key prompts to make the game harder -->
-    <div id="toyBonnie">
-      <div class="tb-ear left"></div>
-      <div class="tb-ear right"></div>
-      <div class="tb-head"></div>
-      <div class="tb-eye left"></div>
-      <div class="tb-eye right"></div>
-      <div class="tb-bowtie"></div>
+    <!-- The music box itself, made of stacked divs -->
+    <div id="musicBoxArt">
+      <div class="box-handle"></div>
+      <div class="box-body"></div>
+      <div class="box-trim"></div>
+      <div class="box-glow"></div>
+      <div id="puppet">
+        <div class="puppet-face">
+          <div class="streak left"></div>
+          <div class="streak right"></div>
+          <div class="eye left"><div class="pupil"></div></div>
+          <div class="eye right"><div class="pupil"></div></div>
+          <div class="cheek left"></div>
+          <div class="cheek right"></div>
+          <div class="mouth"></div>
+        </div>
+      </div>
+      <div class="box-lid"></div>
     </div>
-    <div id="bonnieSpeech"></div>
 
-    <!-- Lists active hard-mode effects after Bonnie's keys are pressed -->
-    <div id="hardModeBox"><span class="label">HARD MODE:</span> <span id="hardModeList">none</span></div>
-  </div>
-
-  <!-- ─────────── DEATH JUMPSCARE OVERLAY ─────────── -->
-  <div id="jumpscareOverlay">
-    <div class="bigFace"></div>
-    <div class="bigEyes"><div></div><div></div></div>
+    <!-- Mobile-only D-pad of WASD touch keys -->
+    <div id="touchPad">
+      <div class="touchKey" data-key="W">W</div>
+      <div class="touchKey" data-key="A">A</div>
+      <div class="touchKey" data-key="S">S</div>
+      <div class="touchKey" data-key="D">D</div>
+    </div>
   </div>
 
   <!-- ─────────── WIN SCREEN ─────────── -->
   <div id="winScreen" class="screen">
     <h1>6:00 AM</h1>
-    <p style="margin-top:1rem;">You stayed still. Freddy retreats.</p>
-    <p style="margin-top:0.5rem;color:#888;">You survived all the nights.</p>
+    <p style="margin-top:1rem;">The music played all night. The Puppet stayed inside.</p>
     <button onclick="window.location.href='night5.html'">CONTINUE</button>
   </div>
 
-  <script src="music.js"></script>
+  <!-- jumpscare.js is the shared face+scream effect used on every death page -->
+  <script src="jumpscare.js"></script>
   <script>
-    // ─────────────── GAME CONSTANTS ───────────────
-    const TOTAL_TIME = 90;            // seconds in the night
-    const FEAR_PER_PIXEL = 0.08;      // how much fear each pixel of mouse motion adds
-    const FEAR_PER_KEY = 6;           // pressing any key startles Freddy
-    const FEAR_DECAY = 1.2;           // fear lost per second when staying still
-    const SCARE_MIN_GAP = 6;          // shortest gap (sec) between scares
-    const SCARE_MAX_GAP = 12;         // longest gap (sec) between scares
-    const MAX_FEAR_PER_FRAME = 8;     // cap so a single huge twitch doesn't insta-kill
+    // ═══════════════════════ CONSTANTS ═══════════════════════
+    const TOTAL_TIME       = 90;     // 1 min 30 sec night
+    const DRAIN_BASE       = 1.0;    // %/sec the music ticks down at the start
+    const DRAIN_END        = 2.2;    // %/sec at the end (linear ramp from BASE)
+    const REWARD_PER_KEY   = 8;      // music gained for each correctly pressed key
+    const PENALTY_WRONG    = 5;      // music lost when player presses wrong key
+    const WARN_THRESHOLD   = 35;     // below this, bar turns red, lid creaks
+    const DANGER_THRESHOLD = 15;     // below this, puppet peeks out
+    const PATTERN_LENS     = [3, 4, 5];   // pattern length per game phase
+    const PHASE_BREAKS     = [30, 60];    // phase boundaries in seconds elapsed
 
-    // ─────────────── GAME STATE ───────────────
-    let fear = 0;
-    let timeLeft = TOTAL_TIME;
-    let lastMouseX = 0;
-    let lastMouseY = 0;
-    let mouseInitialized = false;
+    const KEYS = ['W', 'A', 'S', 'D'];
+
+    // ═══════════════════════ STATE ═══════════════════════
+    let music         = 100;
+    let timeLeft      = TOTAL_TIME;
+    let gameRunning   = false;
     let gameStartTime = 0;
     let lastFrameTime = 0;
-    let nextScareAt = 0;              // seconds-into-night when the next scare happens
-    let gameRunning = false;
+    let pattern       = [];   // letters the player has to press, in order
+    let patternIdx    = 0;    // index of the NEXT key to press
 
-    // DOM refs
+    // ═══════════════════════ DOM REFS ═══════════════════════
     const startScreen = document.getElementById('startScreen');
     const gameScreen  = document.getElementById('gameScreen');
     const winScreen   = document.getElementById('winScreen');
-    const freddyWrap  = document.getElementById('freddyWrap');
-    const pupilL      = document.getElementById('pupilL');
-    const pupilR      = document.getElementById('pupilR');
-    const fearFill    = document.getElementById('fearFill');
-    const fearPct     = document.getElementById('fearPct');
     const timerEl     = document.getElementById('timer');
-    const whisperEl   = document.getElementById('whisper');
-    const flashRed    = document.getElementById('flashRed');
-    const flashWhite  = document.getElementById('flashWhite');
-    const staticBurst = document.getElementById('staticBurst');
-    const jumpOverlay = document.getElementById('jumpscareOverlay');
+    const musicPctEl  = document.getElementById('musicPct');
+    const musicFillEl = document.getElementById('musicFill');
+    const patternRow  = document.getElementById('patternRow');
+    const patternMsg  = document.getElementById('patternMsg');
+    const musicBoxArt = document.getElementById('musicBoxArt');
 
-    // ─────────────── AUDIO (generated, no files) ───────────────
+    // ═══════════════════════ AUDIO ═══════════════════════
+    // We don't use any sound files — every note is generated by Web Audio.
     let audioCtx;
-    function ctx() {
+    function getCtx() {
       if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
       return audioCtx;
     }
-    function playTone(freq, duration, type = 'sine', volume = 0.2) {
-      const c = ctx();
-      const osc = c.createOscillator();
-      const gain = c.createGain();
-      osc.type = type;
-      osc.frequency.value = freq;
-      gain.gain.setValueAtTime(volume, c.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.0001, c.currentTime + duration);
-      osc.connect(gain).connect(c.destination);
-      osc.start();
-      osc.stop(c.currentTime + duration);
-    }
-    function playBoom() {
-      // Low rumble for thuds
-      playTone(40, 0.6, 'sawtooth', 0.35);
-      playTone(60, 0.4, 'sine', 0.18);
-    }
-    function playSting() {
-      // High piano-ish sting
-      playTone(880, 0.25, 'triangle', 0.18);
-      playTone(1320, 0.25, 'triangle', 0.12);
-    }
-    function playRising() {
-      // Tone that swoops up — feels like something approaching
-      const c = ctx();
-      const osc = c.createOscillator();
-      const gain = c.createGain();
-      osc.type = 'sawtooth';
-      osc.frequency.setValueAtTime(110, c.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(700, c.currentTime + 0.5);
-      gain.gain.setValueAtTime(0.18, c.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.0001, c.currentTime + 0.5);
-      osc.connect(gain).connect(c.destination);
-      osc.start();
-      osc.stop(c.currentTime + 0.5);
-    }
-    function playJumpscareSound() {
-      // Big death sound: boom + stings + rising tone all at once
-      playBoom();
-      playRising();
-      setTimeout(() => playSting(), 100);
-      setTimeout(() => playSting(), 250);
+    // Simple one-tone helper. type = 'sine' | 'triangle' | 'square' | 'sawtooth'
+    function playTone(freq, dur, vol = 0.08, type = 'triangle') {
+      try {
+        const c = getCtx();
+        const t = c.currentTime;
+        const osc = c.createOscillator();
+        const gain = c.createGain();
+        osc.type = type;
+        osc.frequency.value = freq;
+        gain.gain.setValueAtTime(0, t);
+        gain.gain.linearRampToValueAtTime(vol, t + 0.005);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + dur);
+        osc.connect(gain).connect(c.destination);
+        osc.start(t);
+        osc.stop(t + dur + 0.05);
+      } catch (e) { /* audio blocked — silently ignore */ }
     }
 
-    // ─────────────── INPUT ───────────────
-    // Track mouse movement: every move, add fear based on distance.
-    document.addEventListener('mousemove', (e) => {
-      if (!gameRunning) {
-        lastMouseX = e.clientX;
-        lastMouseY = e.clientY;
-        return;
-      }
-      if (!mouseInitialized) {
-        lastMouseX = e.clientX;
-        lastMouseY = e.clientY;
-        mouseInitialized = true;
-        return;
-      }
-      const dx = e.clientX - lastMouseX;
-      const dy = e.clientY - lastMouseY;
-      const dist = Math.sqrt(dx * dx + dy * dy);
-      lastMouseX = e.clientX;
-      lastMouseY = e.clientY;
-
-      // Add fear, but cap per movement so a quick swipe isn't fatal.
-      // Hard mode "doubleFear" doubles the fear per pixel — every wiggle hurts.
-      const fppMul = hardMode.doubleFear ? 2 : 1;
-      const add = Math.min(dist * FEAR_PER_PIXEL * fppMul, MAX_FEAR_PER_FRAME * fppMul);
-      fear += add;
-
-      // Move Freddy's pupils to track the cursor (creepy).
-      // We compute how far the cursor is from screen center and shift pupils accordingly.
-      const cx = window.innerWidth / 2;
-      const cy = window.innerHeight / 2;
-      const ox = Math.max(-12, Math.min(12, (e.clientX - cx) / 60));
-      const oy = Math.max(-8,  Math.min(8,  (e.clientY - cy) / 80));
-      pupilL.style.transform = `translate(calc(-50% + ${ox}px), calc(-50% + ${oy}px))`;
-      pupilR.style.transform = `translate(calc(-50% + ${ox}px), calc(-50% + ${oy}px))`;
-    });
-
-    // ─── MOBILE: touch is "moving" (no mouse on a phone) ───
-    // touchmove → adds fear like mousemove. touchstart → adds fear like a key press.
-    // (PC behavior is unchanged because these listeners only do anything on mobile.)
-    const isMobileDevice = document.documentElement.classList.contains('is-mobile');
-    if (isMobileDevice) {
-      document.addEventListener('touchmove', (e) => {
-        if (!gameRunning) return;
-        const t = e.touches[0]; if (!t) return;
-        if (!mouseInitialized) {
-          lastMouseX = t.clientX; lastMouseY = t.clientY;
-          mouseInitialized = true;
-          return;
-        }
-        const dx = t.clientX - lastMouseX;
-        const dy = t.clientY - lastMouseY;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        lastMouseX = t.clientX; lastMouseY = t.clientY;
-
-        const fppMul = hardMode.doubleFear ? 2 : 1;
-        fear += Math.min(dist * FEAR_PER_PIXEL * fppMul, MAX_FEAR_PER_FRAME * fppMul);
-      }, { passive: true });
-
-      // touchstart on the Bonnie bubble = "agree" to that hard-mode prompt.
-      // We attach the per-touch fear penalty in a SEPARATE document listener
-      // so any tap (bubble or not) still costs FEAR_PER_KEY, mirroring desktop.
-      document.addEventListener('touchstart', (e) => {
-        if (!gameRunning) return;
-        fear += FEAR_PER_KEY;
-        if (currentPrompt && bonnieSpeechEl.contains(e.target)) {
-          activateHardMode(currentPrompt);
-        }
-      }, { passive: true });
-    }
-
-    // ─────────────── TOY BONNIE ───────────────
-    // A small purple Bonnie floats around the screen.
-    // He shows speech bubbles asking you to press keys to make the game HARDER.
-    // Pressing those keys still costs FEAR_PER_KEY (so you're double-punished),
-    // but it also activates a permanent harder-mode effect for the rest of the night.
-
-    const bonnieEl = document.getElementById('toyBonnie');
-    const bonnieSpeechEl = document.getElementById('bonnieSpeech');
-    const hardModeBox = document.getElementById('hardModeBox');
-    const hardModeList = document.getElementById('hardModeList');
-
-    let bonnie = {
-      x: 100, y: 200,
-      tx: 100, ty: 200,    // target the bonnie is moving toward
-      retargetTimer: 0
-    };
-    // Note: lastMouseX/lastMouseY are already declared up in GAME STATE,
-    // so we can read them directly to know where the player's cursor is.
-
-    // Hard-mode flags — turned on by pressing Bonnie's prompted keys
-    const hardMode = {
-      fastScares: false,   // scares fire much more often
-      doubleFear: false,   // mouse movement adds 2x fear
-      noDecay:    false,   // fear doesn't drain — every flinch counts forever
-      chaos:      false    // every scare is now a meaner combo scare
-    };
-
-    // The four prompts Bonnie cycles through
-    const bonniePrompts = [
-      { key: 'Q', flag: 'fastScares', text: 'FASTER scares!' },
-      { key: 'F', flag: 'doubleFear', text: 'DOUBLE the fear!' },
-      { key: 'N', flag: 'noDecay',    text: 'NO RELAXING — fear stays!' },
-      { key: 'C', flag: 'chaos',      text: 'CHAOS — combo scares only!' }
+    // Music-box melody — short creepy minor lullaby that loops.
+    // Frequencies in Hz. Lower numbers = lower pitch.
+    const MELODY = [
+      659, 587, 523, 440,    // E5 D5 C5 A4 — descending sad
+      523, 587, 659, 880,    // C5 D5 E5 A5 — climbing
+      659, 523, 440, 392     // E5 C5 A4 G4 — settling low
     ];
-    let currentPrompt = null;
+    let melodyStep  = 0;
+    let melodyTimer = null;
 
-    function showBonniePrompt() {
-      // Pick a prompt that's not already active. If all four are on, hide bubble.
-      const inactive = bonniePrompts.filter(p => !hardMode[p.flag]);
-      if (inactive.length === 0) {
-        bonnieSpeechEl.classList.remove('show');
-        currentPrompt = null;
-        return;
+    // Plays one note, then schedules the next. As `music` drops the tempo
+    // slows down and the volume gets quieter — sounds like a winding-down toy.
+    function playMelody() {
+      if (!gameRunning || music <= 0) return;
+      const baseMs = 280;
+      const tempo  = baseMs + (100 - music) * 7;
+      const vol    = 0.04 + (music / 100) * 0.10;
+      playTone(MELODY[melodyStep % MELODY.length], (tempo / 1000) * 0.85, vol, 'triangle');
+      melodyStep++;
+      melodyTimer = setTimeout(playMelody, tempo);
+    }
+    function stopMelody() {
+      if (melodyTimer) clearTimeout(melodyTimer);
+      melodyTimer = null;
+    }
+
+    // Sound-effects fired on player input
+    function fxCorrect()  { playTone(880, 0.12, 0.10, 'triangle'); }
+    function fxWrong()    { playTone(110, 0.20, 0.18, 'sawtooth'); }
+    function fxComplete() {
+      [659, 784, 988].forEach((f, i) =>
+        setTimeout(() => playTone(f, 0.18, 0.10, 'triangle'), i * 80));
+    }
+    function fxLowDrone() { playTone(80, 0.6, 0.12, 'sawtooth'); }
+
+    // ═══════════════════════ PATTERN LOGIC ═══════════════════════
+    function patternLengthForElapsed(elapsed) {
+      if (elapsed < PHASE_BREAKS[0]) return PATTERN_LENS[0];
+      if (elapsed < PHASE_BREAKS[1]) return PATTERN_LENS[1];
+      return PATTERN_LENS[2];
+    }
+
+    function newPattern() {
+      const elapsed = TOTAL_TIME - timeLeft;
+      const len = patternLengthForElapsed(elapsed);
+      pattern = [];
+      for (let i = 0; i < len; i++) {
+        pattern.push(KEYS[Math.floor(Math.random() * KEYS.length)]);
       }
-      currentPrompt = inactive[Math.floor(Math.random() * inactive.length)];
-      bonnieSpeechEl.innerHTML =
-        `<span class="key-hint">${currentPrompt.key}</span><br>${currentPrompt.text}`;
-      bonnieSpeechEl.classList.add('show');
+      patternIdx = 0;
+      renderPattern();
     }
 
-    function activateHardMode(prompt) {
-      hardMode[prompt.flag] = true;
-      bonnieSpeechEl.innerHTML =
-        `<span class="key-hint">${prompt.key}</span><br><span class="activated">ACTIVATED</span>`;
-      // Refresh the hard-mode list display
-      const labelMap = {
-        fastScares: 'FASTER',
-        doubleFear: '2× FEAR',
-        noDecay:    'NO REST',
-        chaos:      'CHAOS'
-      };
-      const active = Object.keys(hardMode).filter(k => hardMode[k]).map(k => labelMap[k]);
-      hardModeList.textContent = active.join(' • ');
-      hardModeBox.classList.add('show');
-      // Pick a new prompt after a short delay
-      setTimeout(showBonniePrompt, 1500);
+    // Build the row of squares from `pattern` and mark which is next.
+    function renderPattern() {
+      patternRow.innerHTML = '';
+      pattern.forEach((k, i) => {
+        const div = document.createElement('div');
+        div.className = 'patternKey';
+        if (i < patternIdx)        div.classList.add('done');
+        else if (i === patternIdx) div.classList.add('next');
+        div.textContent = k;
+        patternRow.appendChild(div);
+      });
     }
 
-    function pickNewBonnieTarget() {
-      // Stay 80px from screen edges so Bonnie doesn't hide off-screen
-      bonnie.tx = 80 + Math.random() * (window.innerWidth - 230);
-      bonnie.ty = 80 + Math.random() * (window.innerHeight - 250);
-      bonnie.retargetTimer = 2 + Math.random() * 2.5;
+    // Visual feedback for a wrong key — shake, then reset progress.
+    function flashWrongPattern() {
+      Array.from(patternRow.children).forEach(c => c.classList.add('wrong'));
+      setTimeout(() => {
+        patternIdx = 0;
+        renderPattern();
+      }, 400);
     }
 
-    function updateBonnie(dt) {
-      bonnie.retargetTimer -= dt;
-      if (bonnie.retargetTimer <= 0) pickNewBonnieTarget();
+    // Quick "GOOD!" message that pops in and fades out
+    function showCompleteMessage() {
+      patternMsg.textContent = 'GOOD!';
+      patternMsg.classList.remove('show');
+      void patternMsg.offsetWidth;          // restart the CSS animation
+      patternMsg.classList.add('show');
+    }
 
-      // Smoothly slide toward target (ease)
-      const speed = 1.5 + (hardMode.fastScares ? 1 : 0); // float faster in hard mode
-      const dx = bonnie.tx - bonnie.x;
-      const dy = bonnie.ty - bonnie.y;
-      const dist = Math.hypot(dx, dy);
-      if (dist > 0.5) {
-        bonnie.x += (dx / dist) * speed;
-        bonnie.y += (dy / dist) * speed;
+    // ═══════════════════════ INPUT ═══════════════════════
+    // Single entry point — keyboard and touch both call this.
+    function pressKey(letter) {
+      if (!gameRunning) return;
+      const expected = pattern[patternIdx];
+      if (letter === expected) {
+        music = Math.min(100, music + REWARD_PER_KEY);
+        fxCorrect();
+        patternIdx++;
+        if (patternIdx >= pattern.length) {
+          // Pattern complete — pay the bonus, show GOOD!, generate next pattern
+          fxComplete();
+          showCompleteMessage();
+          newPattern();
+        } else {
+          renderPattern();
+        }
+      } else {
+        // Wrong key — penalty + shake + reset to start of pattern
+        music = Math.max(0, music - PENALTY_WRONG);
+        fxWrong();
+        flashWrongPattern();
       }
-      bonnieEl.style.left = bonnie.x + 'px';
-      bonnieEl.style.top  = bonnie.y + 'px';
-
-      // Speech bubble follows below Bonnie
-      bonnieSpeechEl.style.left = (bonnie.x - 65) + 'px';
-      bonnieSpeechEl.style.top  = (bonnie.y + 120) + 'px';
-
-      // Cursor near Bonnie? He glows green.
-      const ddx = (bonnie.x + 35) - lastMouseX;
-      const ddy = (bonnie.y + 55) - lastMouseY;
-      const mDist = Math.hypot(ddx, ddy);
-      bonnieEl.classList.toggle('happy', mDist < 90);
     }
 
-    // Cycle prompts every 7 seconds
-    setInterval(() => {
-      if (gameRunning && !currentPrompt) showBonniePrompt();
-    }, 7000);
-
-    // Any key press = startle = big fear bump.
-    // Plus: if it matches Bonnie's current prompt, activate that hard-mode effect.
+    // Keyboard
     document.addEventListener('keydown', (e) => {
       if (!gameRunning) return;
-      // Don't punish modifier-only presses (like just "shift")
-      if (['Shift', 'Control', 'Alt', 'Meta'].includes(e.key)) return;
-      fear += FEAR_PER_KEY;
-
-      // Did the player press Bonnie's currently-shown key?
-      if (currentPrompt && e.key.toUpperCase() === currentPrompt.key) {
-        activateHardMode(currentPrompt);
+      const letter = e.key.toUpperCase();
+      if (KEYS.includes(letter) && !e.repeat) {
+        e.preventDefault();
+        pressKey(letter);
       }
     });
 
-    // ─────────────── GAME START ───────────────
+    // Mobile: tapping one of the 4 D-pad buttons calls pressKey too
+    document.querySelectorAll('.touchKey').forEach(el => {
+      const letter = el.dataset.key;
+      el.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        if (!gameRunning) return;
+        el.classList.add('pressed');
+        pressKey(letter);
+      }, { passive: false });
+      el.addEventListener('touchend',    () => el.classList.remove('pressed'));
+      el.addEventListener('touchcancel', () => el.classList.remove('pressed'));
+    });
+
+    // ═══════════════════════ GAME LOOP ═══════════════════════
     function startGame() {
       startScreen.style.display = 'none';
-      gameScreen.style.display = 'flex';
+      gameScreen.style.display  = 'flex';
 
-      fear = 0;
-      timeLeft = TOTAL_TIME;
-      mouseInitialized = false;
+      music         = 100;
+      timeLeft      = TOTAL_TIME;
+      gameRunning   = true;
       gameStartTime = performance.now();
       lastFrameTime = gameStartTime;
-      nextScareAt = SCARE_MIN_GAP + Math.random() * (SCARE_MAX_GAP - SCARE_MIN_GAP);
-      gameRunning = true;
+      melodyStep    = 0;
 
-      // Reset hard mode + Bonnie position
-      Object.keys(hardMode).forEach(k => hardMode[k] = false);
-      hardModeBox.classList.remove('show');
-      hardModeList.textContent = 'none';
-      bonnie.x = 100; bonnie.y = 200;
-      pickNewBonnieTarget();
-      // First prompt appears 3 seconds in so the player can settle first
-      setTimeout(() => { if (gameRunning) showBonniePrompt(); }, 3000);
+      newPattern();
 
-      // Tickle the audio context so later sounds work
-      playTone(50, 0.05, 'sine', 0.001);
+      // Tickle the audio context — phones won't make sound until after a tap
+      playTone(50, 0.05, 0.001);
 
+      playMelody();
       requestAnimationFrame(loop);
     }
 
-    // ─────────────── MAIN LOOP ───────────────
     function loop(now) {
       if (!gameRunning) return;
       const dt = (now - lastFrameTime) / 1000;
@@ -1166,329 +760,58 @@
       const elapsed = (now - gameStartTime) / 1000;
       timeLeft = Math.max(0, TOTAL_TIME - elapsed);
 
-      // Fear slowly leaks away when the player is calm.
-      // Hard mode "noDecay" turns this off entirely — every flinch is permanent.
-      const decayRate = hardMode.noDecay ? 0 : FEAR_DECAY;
-      fear = Math.max(0, fear - decayRate * dt);
+      // Drain rate ramps up over the night so it gets harder near the end
+      const drainRate = DRAIN_BASE + (DRAIN_END - DRAIN_BASE) * (elapsed / TOTAL_TIME);
+      music = Math.max(0, music - drainRate * dt);
 
-      // Update toy Bonnie's position and "happy" state every frame.
-      updateBonnie(dt);
+      // ── HUD numbers ──
+      const minutes = Math.floor(timeLeft / 60);
+      const seconds = Math.floor(timeLeft % 60);
+      timerEl.textContent = `Time: ${minutes}:${seconds.toString().padStart(2, '0')}`;
 
-      // Trigger the next scare?
-      if (elapsed >= nextScareAt) {
-        triggerRandomScare();
-        // Hard mode "fastScares" cuts the gap roughly in half.
-        const gapMul = hardMode.fastScares ? 0.55 : 1;
-        const minGap = SCARE_MIN_GAP * gapMul;
-        const maxGap = SCARE_MAX_GAP * gapMul;
-        nextScareAt = elapsed + minGap + Math.random() * (maxGap - minGap);
-      }
+      const pct = Math.round(music);
+      musicPctEl.textContent = pct;
+      musicFillEl.style.width = pct + '%';
+      musicFillEl.classList.toggle('low', music < WARN_THRESHOLD);
 
-      // Update HUD
-      const pct = Math.min(100, fear);
-      fearPct.textContent = Math.round(pct);
-      fearFill.style.width = pct + '%';
-      if (pct > 65) fearFill.classList.add('high');
-      else fearFill.classList.remove('high');
+      // ── Music box state classes drive its visual reactions ──
+      musicBoxArt.classList.toggle('warn',   music < WARN_THRESHOLD   && music >= DANGER_THRESHOLD);
+      musicBoxArt.classList.toggle('danger', music < DANGER_THRESHOLD && music > 0);
+      // Wind-up handle visibly slows down as music drops
+      musicBoxArt.style.setProperty('--spin', (3 + (100 - music) * 0.1) + 's');
 
-      const total = Math.ceil(timeLeft);
-      const m = Math.floor(total / 60);
-      const s = total % 60;
-      timerEl.textContent = 'Time: ' + m + ':' + (s < 10 ? '0' + s : s);
-
-      // End conditions
-      if (fear >= 100) {
-        gameRunning = false;
-        die();
-        return;
-      }
-      if (timeLeft <= 0) {
-        gameRunning = false;
-        win();
-        return;
-      }
+      if (music <= 0) { die();  return; }
+      if (timeLeft <= 0) { win(); return; }
 
       requestAnimationFrame(loop);
     }
 
-    // ─────────────── SCARES ───────────────
-    // A list of scare functions. Each one tries to startle the player
-    // into moving. Picked randomly at random intervals.
-    const scares = [
-      function redFlashScare() {
-        flashRed.classList.add('show');
-        playBoom();
-        setTimeout(() => flashRed.classList.remove('show'), 200);
-      },
-      function whiteFlashScare() {
-        flashWhite.classList.add('show');
-        playSting();
-        setTimeout(() => flashWhite.classList.remove('show'), 200);
-      },
-      function eyeBurstScare() {
-        pupilL.classList.add('scared');
-        pupilR.classList.add('scared');
-        playRising();
-        setTimeout(() => {
-          pupilL.classList.remove('scared');
-          pupilR.classList.remove('scared');
-        }, 400);
-      },
-      function zoomScare() {
-        freddyWrap.classList.add('zoom');
-        playBoom();
-        setTimeout(() => freddyWrap.classList.remove('zoom'), 460);
-      },
-      function lungeScare() {
-        freddyWrap.classList.add('lunge');
-        pupilL.classList.add('scared');
-        pupilR.classList.add('scared');
-        playBoom();
-        playRising();
-        setTimeout(() => {
-          freddyWrap.classList.remove('lunge');
-          pupilL.classList.remove('scared');
-          pupilR.classList.remove('scared');
-        }, 360);
-      },
-      function tiltScare() {
-        freddyWrap.classList.add('tilt');
-        playSting();
-        setTimeout(() => freddyWrap.classList.remove('tilt'), 600);
-      },
-      function shakeScare() {
-        document.body.classList.add('shake');
-        playBoom();
-        setTimeout(() => document.body.classList.remove('shake'), 420);
-      },
-      function staticBurstScare() {
-        staticBurst.classList.add('show');
-        playSting();
-        setTimeout(() => staticBurst.classList.remove('show'), 200);
-      },
-      function whisperScare() {
-        const lines = [
-          "don't move", "he sees you", "behind you", "stay still",
-          "too late", "do not breathe", "not yet", "almost"
-        ];
-        whisperEl.textContent = lines[Math.floor(Math.random() * lines.length)];
-        // Place the whisper at a random spot near the edges
-        whisperEl.style.left = (10 + Math.random() * 70) + '%';
-        whisperEl.style.top  = (10 + Math.random() * 80) + '%';
-        whisperEl.style.opacity = 1;
-        playRising();
-        setTimeout(() => { whisperEl.style.opacity = 0; }, 1300);
-      },
-      function comboScare() {
-        // Two effects at once — meaner.
-        flashRed.classList.add('show');
-        document.body.classList.add('shake');
-        pupilL.classList.add('scared');
-        pupilR.classList.add('scared');
-        playBoom();
-        playSting();
-        setTimeout(() => {
-          flashRed.classList.remove('show');
-          document.body.classList.remove('shake');
-          pupilL.classList.remove('scared');
-          pupilR.classList.remove('scared');
-        }, 420);
-      },
-
-      // ═══════════════════ HALLUCINATIONS ═══════════════════
-      // These mess with the player's perception. They make you doubt what you see.
-
-      function ghostFreddyScare() {
-        // 5 mini ghost-Freddys pop up at random screen spots in quick succession
-        for (let n = 0; n < 5; n++) {
-          setTimeout(() => {
-            const ghost = document.createElement('div');
-            ghost.className = 'ghost-freddy';
-            ghost.style.left = (Math.random() * 80 + 5) + '%';
-            ghost.style.top  = (Math.random() * 60 + 15) + '%';
-            ghost.innerHTML = '<div class="gf-head"></div><div class="gf-eyes"><div></div><div></div></div>';
-            gameScreen.appendChild(ghost);
-            setTimeout(() => ghost.remove(), 500);
-          }, n * 90);
-        }
-        playRising();
-      },
-
-      function eyesInDarkScare() {
-        // Pairs of red eyes blink open at random spots in the room
-        for (let n = 0; n < 4; n++) {
-          setTimeout(() => {
-            const pair = document.createElement('div');
-            pair.className = 'eye-pair';
-            pair.style.left = (Math.random() * 80 + 5) + '%';
-            pair.style.top  = (Math.random() * 70 + 10) + '%';
-            pair.innerHTML = '<div></div><div></div>';
-            gameScreen.appendChild(pair);
-            setTimeout(() => pair.remove(), 600);
-          }, n * 110);
-        }
-        playSting();
-      },
-
-      function bloodSplatScare() {
-        // Red splatter blooms across the screen
-        const blood = document.createElement('div');
-        blood.className = 'blood-splat';
-        gameScreen.appendChild(blood);
-        playBoom();
-        playSting();
-        setTimeout(() => blood.remove(), 700);
-      },
-
-      function warningTextScare() {
-        // Big red warning text flashes — designed to make you flinch
-        const messages = [
-          "BEHIND YOU", "RUN", "HE'S HERE", "DON'T MOVE",
-          "YOU CAN'T HIDE", "TOO LATE", "LOOK AWAY", "HE KNOWS"
-        ];
-        const text = messages[Math.floor(Math.random() * messages.length)];
-        const warn = document.createElement('div');
-        warn.className = 'warning-text';
-        warn.textContent = text;
-        gameScreen.appendChild(warn);
-        playBoom();
-        playRising();
-        setTimeout(() => warn.remove(), 800);
-      },
-
-      function heartbeatScare() {
-        // Whole screen pulses red, with 4 heart-thump sounds
-        const pulse = document.createElement('div');
-        pulse.className = 'heartbeat-pulse';
-        gameScreen.appendChild(pulse);
-        playTone(50, 0.13, 'sine', 0.32);
-        setTimeout(() => playTone(50, 0.13, 'sine', 0.32), 280);
-        setTimeout(() => playTone(50, 0.13, 'sine', 0.32), 560);
-        setTimeout(() => playTone(50, 0.13, 'sine', 0.32), 840);
-        setTimeout(() => pulse.remove(), 1200);
-      },
-
-      function altAnimatronicScare() {
-        // A different animatronic (Foxy/Bonnie/Chica) head flashes briefly
-        // — your brain says "wait, that's not Freddy" — perfect hallucination
-        const types = ['alt-foxy', 'alt-bonnie', 'alt-chica'];
-        const type = types[Math.floor(Math.random() * types.length)];
-        const head = document.createElement('div');
-        head.className = 'alt-head ' + type;
-        head.innerHTML = '<div class="alt-eye l"></div><div class="alt-eye r"></div>';
-        gameScreen.appendChild(head);
-        playRising();
-        playSting();
-        setTimeout(() => head.remove(), 460);
-      },
-
-      function hudGlitchScare() {
-        // The HUD itself glitches out — timer says "ERROR", fear meter says "???"
-        // Resets after 0.4s. Scarier than it sounds — the UI lying to you is unsettling.
-        const timerEl  = document.getElementById('timer');
-        const fearBox  = document.getElementById('fearBox');
-        const fearPct  = document.getElementById('fearPct');
-        const oldTimer = timerEl.textContent;
-        const oldFear  = fearPct.textContent;
-        timerEl.classList.add('glitch');
-        fearBox.classList.add('glitch');
-        timerEl.textContent = 'Time: ERROR';
-        fearPct.textContent = '???';
-        playSting();
-        setTimeout(() => {
-          timerEl.classList.remove('glitch');
-          fearBox.classList.remove('glitch');
-          // Real values restore on the next frame in the loop, but set them now too
-          timerEl.textContent = oldTimer;
-          fearPct.textContent = oldFear;
-        }, 450);
-      },
-
-      function teleportScare() {
-        // Freddy seems to vanish and reappear in a different spot — but not really
-        freddyWrap.classList.add('teleport');
-        playRising();
-        playSting();
-        setTimeout(() => freddyWrap.classList.remove('teleport'), 500);
-      },
-
-      function invertScare() {
-        // The whole screen inverts colors for a quarter second
-        document.body.classList.add('invert-flash');
-        playBoom();
-        setTimeout(() => document.body.classList.remove('invert-flash'), 250);
-      },
-
-      function megaComboScare() {
-        // The meanest — multiple hallucinations stacked at once
-        flashRed.classList.add('show');
-        staticBurst.classList.add('show');
-        document.body.classList.add('shake');
-        pupilL.classList.add('scared');
-        pupilR.classList.add('scared');
-        freddyWrap.classList.add('zoom');
-        // Plus a warning text
-        const warn = document.createElement('div');
-        warn.className = 'warning-text';
-        warn.textContent = 'HE\'S HERE';
-        gameScreen.appendChild(warn);
-        // Plus eye pairs in 3 corners
-        for (let n = 0; n < 3; n++) {
-          setTimeout(() => {
-            const pair = document.createElement('div');
-            pair.className = 'eye-pair';
-            pair.style.left = (Math.random() * 80 + 5) + '%';
-            pair.style.top  = (Math.random() * 70 + 10) + '%';
-            pair.innerHTML = '<div></div><div></div>';
-            gameScreen.appendChild(pair);
-            setTimeout(() => pair.remove(), 600);
-          }, n * 100);
-        }
-        // Layered audio chaos
-        playBoom();
-        playSting();
-        playRising();
-        setTimeout(() => playSting(), 200);
-        setTimeout(() => {
-          flashRed.classList.remove('show');
-          staticBurst.classList.remove('show');
-          document.body.classList.remove('shake');
-          pupilL.classList.remove('scared');
-          pupilR.classList.remove('scared');
-          freddyWrap.classList.remove('zoom');
-          warn.remove();
-        }, 600);
-      }
-    ];
-    function triggerRandomScare() {
-      // Chaos mode: every scare is the meanest — combo and mega-combo only.
-      // The names are stored on the function via `.name`, so we filter by them.
-      if (hardMode.chaos) {
-        const meanScares = scares.filter(s =>
-          s.name === 'comboScare' || s.name === 'megaComboScare'
-        );
-        meanScares[Math.floor(Math.random() * meanScares.length)]();
-      } else {
-        scares[Math.floor(Math.random() * scares.length)]();
-      }
-    }
-
-    // ─────────────── END STATES ───────────────
     function die() {
-      // Show Freddy's giant face overlay first (the night4-specific scare),
-      // then layer the shared scary jumpscare on top, then redirect.
-      jumpOverlay.style.display = 'block';
+      gameRunning = false;
+      stopMelody();
+
+      // Lid bursts open, puppet rises out, screen shakes
+      musicBoxArt.classList.remove('warn', 'danger');
+      musicBoxArt.classList.add('dying');
+
+      // Two ominous sub-bass thuds, then the shared big jumpscare
+      fxLowDrone();
+      setTimeout(() => fxLowDrone(), 300);
+
       setTimeout(() => {
         window.runJumpscare(() => {
           window.location.href = 'IDK.html';
         });
-      }, 600);
+      }, 950);
     }
+
     function win() {
+      gameRunning = false;
+      stopMelody();
       gameScreen.style.display = 'none';
-      winScreen.style.display = 'flex';
+      winScreen.style.display  = 'flex';
     }
   </script>
-<script src="jumpscare.js"></script>
+
 </body>
 </html>

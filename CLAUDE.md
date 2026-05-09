@@ -53,30 +53,24 @@ _Этот раздел заполняется вместе с автором. К
 - **Visuals:** Foxy is pure CSS — no image files. Hallway is CSS perspective trick. Flashlight beam is a radial gradient overlay.
 - **Audio:** Footsteps, growl, jumpscare scream — all generated via Web Audio API.
 
-**Night 4 — Freddy / Stay Still** (built — `night4.html`)
-- **Threat:** Freddy. He's in the room, watching you.
-- **Player tool:** Stillness. Don't move the mouse. Don't press keys.
-- **Goal:** Survive 1.5 minutes (90 seconds) without flinching.
-- **Cues:** Random scares every 6–12 seconds — designed to startle the player into moving. There are now ~20 different scare types in three flavors:
-  - **Basic:** red flash, white flash, eye burst, screen shake, static burst, whisper text, tilt
-  - **Freddy-direct:** zoom, lunge, teleport (flicker side-to-side)
-  - **Hallucinations:** ghost-Freddy mini figures popping at random spots, pairs of red eyes opening in the dark, blood splatter overlay, full-screen warning text ("BEHIND YOU", "RUN", "HE'S HERE"), heartbeat-pulse with 4 thumps, alternate-animatronic head flash (Foxy/Bonnie/Chica), HUD glitch (timer says ERROR, fear says ???), color invert flash, and a mega-combo that stacks multiple effects at once.
+**Night 4 — The Puppet / Music Box** (built — `night4.html`)
+- **Threat:** The Puppet (marionette). Sleeps inside a music box. Wakes up if the music dies.
+- **Player tool:** Wind up the music box by pressing keys in a shown pattern.
+- **Goal:** Survive 90 seconds without letting the music hit 0%.
 - **Mechanics:**
-  - Mouse movement adds fear: 0.08 fear per pixel moved, capped at 8 per frame.
-  - Pressing any key (except modifiers) adds 6 fear instantly.
-  - Fear decays at 1.2/second when staying still — small flinches are recoverable.
-- **Lose condition:** Fear reaches 100 → giant Freddy face jumpscare → redirect to `IDK.html`.
-- **Win condition:** Survive 90 seconds.
-- **Visual:** Freddy is rendered in pure CSS (no images): head, ears, hat, snout, bowtie, body, glowing yellow eyes that follow the cursor. Breathing animation. Subtle moving fog + faint TV scanlines for atmosphere.
-- **Toy Bonnie companion:** A small purple Bonnie (CSS art) floats around the screen on a smooth easing path. He glows green when the cursor is near him. He also pops a speech bubble every ~7 seconds suggesting the player press a key (Q / F / N / C). Pressing the prompted key:
-  - Costs `FEAR_PER_KEY` fear (the existing key penalty still applies).
-  - Activates a permanent hard-mode flag for the rest of the night:
-    - **Q → fastScares**: scare gap × 0.55 (almost twice as frequent).
-    - **F → doubleFear**: mouse-movement fear is doubled.
-    - **N → noDecay**: fear stops decaying — every flinch is permanent.
-    - **C → chaos**: every scare is now `comboScare` or `megaComboScare`.
-  - Active hard-mode effects are listed in a bottom-left HUD box.
-- **Audio:** All scare sounds (boom, sting, rising tone, jumpscare) generated via Web Audio API — no sound files.
+  - `music` starts at 100%, drains continuously. Drain rate ramps from `DRAIN_BASE` (1.0%/sec) to `DRAIN_END` (2.2%/sec) linearly over the night.
+  - A pattern of W/A/S/D letters is shown on screen. The player presses them in order.
+  - Each correctly-pressed key: `+REWARD_PER_KEY` (8%). Wrong key: `-PENALTY_WRONG` (5%) and the pattern resets to its first key.
+  - Pattern length grows over the night: 3 keys for first 30 sec, 4 keys for next 30 sec, 5 keys after 60 sec.
+- **Visual feedback states on the music box:**
+  - `warn` (music < 35%): bar turns red and pulses, lid creaks slightly open, puppet's face peeks from inside the box.
+  - `danger` (music < 15%): lid opens further, puppet rises higher into view.
+  - `dying` (music = 0): lid bursts to ~95° open, puppet zooms up out of the box, screen shakes — then the shared `runJumpscare()` from `jumpscare.js` plays before redirect to `IDK.html`.
+- **Visual:** Music box, brass trim, glowing seam, hinged lid, and a slowly-spinning wind-up handle — all pure CSS (no images). The Puppet (white face, black eye streaks, pink cheeks, red mouth) is built from divs and lives inside the box, hidden until the lid opens.
+- **Audio:** All Web Audio API:
+  - A 12-note minor-key lullaby loops continuously while music > 0. Tempo slows and volume drops as music level falls — sounds like a real wind-down.
+  - Correct key: high `triangle` ping. Wrong key: low `sawtooth` thud. Pattern complete: 3-note ascending arpeggio. Death prelude: two sub-bass `sawtooth` drones, then the shared scream from `jumpscare.js`.
+- **Mobile:** A 4-button D-pad (W/A/S/D) appears at bottom-right on touch devices. Tapping a button calls the same `pressKey()` function that the keyboard handler uses, so all the game logic is shared.
 
 **Night 5 — The Office / FNAF1-style** (built — `night5.html`, comes AFTER `night4.html`)
 - **Threat:** all four animatronics at once — Bonnie, Chica, Foxy, Freddy.
