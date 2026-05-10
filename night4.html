@@ -546,8 +546,8 @@
     const TOTAL_TIME       = 90;     // 1 min 30 sec night
     const DRAIN_BASE       = 1.0;    // %/sec the music ticks down at the start
     const DRAIN_END        = 2.2;    // %/sec at the end (linear ramp from BASE)
-    const REWARD_PER_KEY   = 8;      // music gained for each correctly pressed key
-    const PENALTY_WRONG    = 5;      // music lost when player presses wrong key
+    const REWARD_PER_KEY   = 3;      // music gained for each correctly pressed key
+    const PENALTY_WRONG    = 6;      // music lost when player presses wrong key
     const WARN_THRESHOLD   = 35;     // below this, bar turns red, lid creaks
     const DANGER_THRESHOLD = 15;     // below this, puppet peeks out
     const PATTERN_LENS     = [3, 4, 5];   // pattern length per game phase
@@ -556,7 +556,7 @@
     const KEYS = ['W', 'A', 'S', 'D'];
 
     // ═══════════════════════ STATE ═══════════════════════
-    let music         = 100;
+    let music         = 10;
     let timeLeft      = TOTAL_TIME;
     let gameRunning   = false;
     let gameStartTime = 0;
@@ -736,7 +736,7 @@
       startScreen.style.display = 'none';
       gameScreen.style.display  = 'flex';
 
-      music         = 100;
+      music         = 10;
       timeLeft      = TOTAL_TIME;
       gameRunning   = true;
       gameStartTime = performance.now();

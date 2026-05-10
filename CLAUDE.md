@@ -58,9 +58,9 @@ _Этот раздел заполняется вместе с автором. К
 - **Player tool:** Wind up the music box by pressing keys in a shown pattern.
 - **Goal:** Survive 90 seconds without letting the music hit 0%.
 - **Mechanics:**
-  - `music` starts at 100%, drains continuously. Drain rate ramps from `DRAIN_BASE` (1.0%/sec) to `DRAIN_END` (2.2%/sec) linearly over the night.
+  - `music` starts at **10%** (dangerously low — the player must wind up immediately) and drains continuously. Drain rate ramps from `DRAIN_BASE` (1.0%/sec) to `DRAIN_END` (2.2%/sec) linearly over the night.
   - A pattern of W/A/S/D letters is shown on screen. The player presses them in order.
-  - Each correctly-pressed key: `+REWARD_PER_KEY` (8%). Wrong key: `-PENALTY_WRONG` (5%) and the pattern resets to its first key.
+  - Each correctly-pressed key: `+REWARD_PER_KEY` (3%). Wrong key: `-PENALTY_WRONG` (6%) and the pattern resets to its first key.
   - Pattern length grows over the night: 3 keys for first 30 sec, 4 keys for next 30 sec, 5 keys after 60 sec.
 - **Visual feedback states on the music box:**
   - `warn` (music < 35%): bar turns red and pulses, lid creaks slightly open, puppet's face peeks from inside the box.
